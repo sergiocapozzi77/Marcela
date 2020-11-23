@@ -26,8 +26,7 @@ WiFiMulti wifiMulti;
 const char* ssid = "99BB Hyperoptic 1Gbps Broadband";
 const char* password = "hszdtubp";
 #define FORMAT_SPIFFS_IF_FAILED true
-#define MAX_HTTP_RECV_BUFFER 512
-#define MAX_HTTP_OUTPUT_BUFFER 2048
+#define MAX_HTTP_RECV_BUFFER 2048
 
 
 typedef struct {
@@ -118,7 +117,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             break;
         case HTTP_EVENT_ON_DATA:
         {
-            Serial.println("HTTP_EVENT_ON_DATA");
             userData *usrData = (userData *) evt->user_data;
             if(!receivingFile)
             {
@@ -131,8 +129,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             receivingFile = true;
 
             if (!esp_http_client_is_chunked_response(evt->client)) {
-                Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
-                Serial.println(evt->data_len);
+               // Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
+               // Serial.println(evt->data_len);
                 appendFile(SPIFFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
             }
             else
@@ -309,7 +307,9 @@ void downloadFile(const char *link, String fileName)
         config->query         = "";
         config->max_redirection_count = 2;
         config->disable_auto_redirect = false;
-        config->user_data = &user;
+        config->user_data = user;
+        config->buffer_size = 2048;
+
 
         esp_http_client_handle_t client = esp_http_client_init(config);
         esp_err_t err = esp_http_client_perform(client);
@@ -335,5 +335,7 @@ void downloadFile(const char *link, String fileName)
 void loop() {
    downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt");
    readFile(SPIFFS, "/index.txt");
+   downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/0011.mp3", "/0011.mp3");
+   listDir(SPIFFS, "/", 0);   
    delay(50000);
 }
