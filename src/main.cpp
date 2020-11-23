@@ -265,8 +265,9 @@ void readFile(fs::FS &fs, const char * path){
     }
 
     Serial.println("- read from file:");
-    while(file.available()){
-        Serial.write(file.read());
+    while(file.available()){        
+        Serial.print(file.readString());
+        Serial.print("line")
     }
 }
 
@@ -293,23 +294,19 @@ void setup() {
     }
 
     wifiMulti.addAP(ssid, password);
-
-
 }
 
-void downloadIndexFile()
+void downloadFile(const char *link, String fileName)
 {
       // wait for WiFi connection
    if((wifiMulti.run() == WL_CONNECTED)) {
-        Serial.println("userData");
         userData *user = new userData();
-        user->fileName = "/index.txt";
-        Serial.println("userData 1");
+        user->fileName = fileName;
 
         esp_http_client_config_t *config = new esp_http_client_config_t();
         //config->url = "http://httpbin.org/stream/1";
      //   config->url = "http://www.sci.utah.edu/~macleod/docs/txt2html/sample.txt";
-        config->url = "https://raw.githubusercontent.com/sergiocapozzi77/esp32/master/ccc.txt";
+        config->url = link;
         config->event_handler = _http_event_handler;
         config->method        = HTTP_METHOD_GET;
         config->path          = "/";
@@ -319,10 +316,8 @@ void downloadIndexFile()
         config->max_redirection_count = 2;
         config->disable_auto_redirect = false;
         config->user_data = &user;
-        Serial.println("userData 2");
 
         esp_http_client_handle_t client = esp_http_client_init(config);
-        Serial.println("userData 3");
         esp_err_t err = esp_http_client_perform(client);
         Serial.println("Created esp_http_client_perform");
 
@@ -344,7 +339,7 @@ void downloadIndexFile()
 }
 
 void loop() {
-   downloadIndexFile();
+   downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt");
    readFile(SPIFFS, "/index.txt");
    delay(50000);
 }
