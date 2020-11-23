@@ -266,8 +266,8 @@ void readFile(fs::FS &fs, const char * path){
 
     Serial.println("- read from file:");
     while(file.available()){        
-        Serial.print(file.readString());
-        Serial.print("line")
+        Serial.println(file.readStringUntil('\n'));
+        Serial.println("--------");
     }
 }
 
@@ -286,12 +286,6 @@ void setup() {
     USE_SERIAL.println();
     USE_SERIAL.println();
     readFile(SPIFFS, "/index.txt");
-
-    for(uint8_t t = 4; t > 0; t--) {
-        USE_SERIAL.printf("[SETUP] WAIT %d...\n", t);
-        USE_SERIAL.flush();
-        delay(1000);
-    }
 
     wifiMulti.addAP(ssid, password);
 }
