@@ -1,4 +1,1 @@
-ciao Marcela
-line 2
-line 3
-line 4
+{ type: "mp3", link:"0011", target:"/0011.mp3" }
