@@ -1,5 +1,5 @@
-{ "type": "mp3", "link":"0011", "target":"/0011.mp3" }
-{ "type": "ota", "link":"firmware.bin"}
-{ "type": "mp3", "link":"0013", "target":"/0013.mp3" }
+{ id:1, "type": "mp3", "link":"0011", "target":"/0011.mp3" }
+{ id:2, "type": "ota", "link":"firmware.bin"}
+{ id:3, "type": "mp3", "link":"0013", "target":"/0013.mp3" }
 sdfsdfsd
 sdfsfds

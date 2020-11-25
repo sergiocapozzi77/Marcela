@@ -24,7 +24,7 @@ typedef struct {
 static bool receivingFile = false;
 static unsigned int totalSize = 0;
 
-
+bool success;
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -100,10 +100,15 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             {
                 if (Update.end(true)) { //true to set the size to the current progress
                     Serial.printf("] Update Success: %u\nRebooting...\n", totalSize);
-                    ESP.restart();
+                    success = true;
                 } else {
                     Update.printError(Serial);
+                    success = false;
                 }
+            }
+            else
+            {
+                success = true;
             }
 
             Serial.printf("Data received: %u", totalSize);
@@ -120,6 +125,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             {
                 Update.abort();
             }
+
+            success = false;
          //   esp_err_t err = esp_tls_get_and_clear_last_error(evt->data, &mbedtls_err, NULL);
            // if (err != 0) {
              //   if (output_buffer != NULL) {
@@ -135,8 +142,9 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-void downloadFile(const char *link, String fileName, fs::FS &fs, bool isOtaUpdate)
+bool downloadFile(const char *link, String fileName, fs::FS &fs, bool isOtaUpdate)
 {
+    success = false;
     Serial.print("downloadFile: ");
     Serial.println(fileName);
     Serial.print("isOtaUpdate: ");
@@ -185,4 +193,6 @@ void downloadFile(const char *link, String fileName, fs::FS &fs, bool isOtaUpdat
     esp_http_client_cleanup(client);
     delete user;
     delete config;
+
+    return success;
 }
