@@ -13,16 +13,18 @@
 #include "downloader.h"
 #include "fsHelper.h"
 #include "SD.h"
+#include "SPIFFS.h"
 
 WiFiMulti wifiMulti;
 const char* ssid = "99BB Hyperoptic 1Gbps Broadband";
 const char* password = "hszdtubp";
 
+fs::FS activeFS = SPIFFS;
+#define BASE_ADDRESS "https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/"
 
 void setup() {
 
     Serial.begin(115200);
-    Serial.println("Ciao OTA");
     if(!SDSetup())
     {
         Serial.println("Unable to read SD");
@@ -31,7 +33,7 @@ void setup() {
 
     spiffsSetup();
 
-    listDir(SD, "/", 0);
+    listDir(activeFS, "/", 0);
 
     Serial.println();
     Serial.println();
@@ -42,11 +44,11 @@ void setup() {
 
 void loop() {
     if((wifiMulti.run() == WL_CONNECTED)) {
-        downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt", false);
+        downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt", activeFS, false);
         //downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/0011", "/0011.mp3");
 
-        listDir(SD, "/", 0);   
-        readFile(SD, "/index.txt");
+        listDir(activeFS, "/", 0);   
+        readFile(activeFS, "/index.txt");
         if(startReadingIndex())
         {
             Serial.println("Found lines");
@@ -55,11 +57,10 @@ void loop() {
                 readNextIndexConfig(doc);
                 if(!doc.isNull())
                 {
-                    if(doc.containsKey("type"))
+                    if(doc["type"] == "ota")
                     {
-                        Serial.print("Found type: ");
-                        String type = doc["sd"].as<String>();
-                        //Serial.println(operator["type"].c_str);
+                        Serial.print("Found OTA");
+                        downloadFile(strcat(BASE_ADDRESS, doc["link"]), "", activeFS, true);
                     }
                 }
                 else
