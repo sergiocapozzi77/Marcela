@@ -6,7 +6,7 @@
  */
 
 #include <Arduino.h>
-
+#include <ArduinoNvs.h> 
 #include <WiFi.h>
 #include <WiFiMulti.h>
 
@@ -14,10 +14,6 @@
 #include "fsHelper.h"
 #include "SD.h"
 #include "SPIFFS.h"
-#include "EEPROM.h"
-
-int eepromAddr = 0;
-#define EEPROM_SIZE 64
 
 WiFiMulti wifiMulti;
 const char* ssid = "99BB Hyperoptic 1Gbps Broadband";
@@ -28,42 +24,6 @@ fs::FS activeFS = SPIFFS;
 
 unsigned int currentVersion = 0;
 
-void writeIntIntoEEPROM(int address, int number)
-{ 
-  EEPROM.write(address, number >> 8);
-  EEPROM.write(address + 1, number & 0xFF);
-}
-
-int readIntFromEEPROM(int address)
-{
-  return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
-}
-
-void writeUnsignedIntIntoEEPROM(int address, unsigned int number)
-{ 
-  EEPROM.write(address, number >> 8);
-  EEPROM.write(address + 1, number & 0xFF);
-}
-
-unsigned int readUnsignedIntFromEEPROM(int address)
-{
-  return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
-}
-
-void writeUnsignedLongIntoEEPROM(int address, unsigned long number)
-{ 
-  EEPROM.write(address, (number >> 24) & 0xFF);
-  EEPROM.write(address + 1, (number >> 16) & 0xFF);
-  EEPROM.write(address + 2, (number >> 8) & 0xFF);
-  EEPROM.write(address + 3, number & 0xFF);
-}
-unsigned long readUnsignedLongFromEEPROM(int address)
-{
-  return ((unsigned long)EEPROM.read(address) << 24) +
-         ((unsigned long)EEPROM.read(address + 1) << 16) +
-         ((unsigned long)EEPROM.read(address + 2) << 8) +
-         (unsigned long)EEPROM.read(address + 3);
-}
 
 void setup() {
 
@@ -74,23 +34,26 @@ void setup() {
       //  return;
     }
 
-    if (!EEPROM.begin(EEPROM_SIZE))
+    if(!NVS.begin())
     {
-        Serial.println("failed to initialise EEPROM");
+        Serial.println("Unable to initialize NVS");
+        delay(3000);
+        ESP.restart();
+      //  return;
     }
 
-    unsigned long magicKey = ESP.getEfuseMac();
-    unsigned long readKey = readUnsignedLongFromEEPROM(60);
+    uint64_t magicKey = ESP.getEfuseMac();
+    uint64_t readKey = NVS.getInt("mac");
     if(readKey != magicKey)
     { // first startup
         Serial.print("Different magic keys: first startup");
-        writeUnsignedLongIntoEEPROM(60, magicKey);
+        NVS.setInt("mac", magicKey);
         currentVersion = 0;
-        writeUnsignedIntIntoEEPROM(0, currentVersion);
+        NVS.setInt("version", currentVersion);
     }
 
     spiffsSetup();
-    currentVersion = readUnsignedIntFromEEPROM(0);
+    currentVersion = NVS.getInt("version");
 
     Serial.print("Current version: ");Serial.println(currentVersion);
     listDir(activeFS, "/", 0);
@@ -118,7 +81,7 @@ void loop() {
                 readNextIndexConfig(doc);
                 if(!doc.isNull())
                 {
-                    unsigned int version = doc["id"].as<unsigned int>();
+                    uint32_t version = doc["id"].as<uint32_t>();
                     Serial.print("Read version: ");Serial.println(version);
                     if(version <= currentVersion)
                     {
@@ -138,7 +101,7 @@ void loop() {
                             currentVersion = version;
                             Serial.print("Writing version: ");
                             Serial.println(version);
-                            writeUnsignedIntIntoEEPROM(0, version);
+                            NVS.setInt("version", version);
                             ESP.restart();
                         }
                     }
