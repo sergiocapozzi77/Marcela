@@ -10,7 +10,8 @@
 #include "esp_tls.h"
 
 #include "fsHelper.h"
-#include "SPIFFS.h"
+//#include "SPIFFS.h"
+#include "SD.h"
 
 #define MAX_HTTP_RECV_BUFFER 2048
 
@@ -40,7 +41,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             userData *usrData = (userData *) evt->user_data;
             if(!receivingFile)
             {
-                deleteIfExists(SPIFFS, usrData->fileName.c_str());
+                deleteIfExists(SD, usrData->fileName.c_str());
             }
 
             receivingFile = true;
@@ -48,13 +49,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             if (!esp_http_client_is_chunked_response(evt->client)) {
                // Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
                // Serial.println(evt->data_len);
-                appendFile(SPIFFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                appendFile(SD, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
             }
             else
             {
                 Serial.print("HTTP_EVENT_ON_DATA NOCHUNK: ");
                 Serial.println(evt->data_len);
-                writeFile(SPIFFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                writeFile(SD, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
             }          
 
             break;
@@ -124,6 +125,4 @@ void downloadFile(const char *link, String fileName)
     esp_http_client_cleanup(client);
     delete user;
     delete config;
-    listDir(SPIFFS, "/", 0);     
-
 }

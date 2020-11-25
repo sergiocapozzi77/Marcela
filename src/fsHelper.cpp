@@ -1,6 +1,7 @@
 #include "fsHelper.h"
 
 #include "SPIFFS.h"
+#include "SD.h"
 #define FORMAT_SPIFFS_IF_FAILED true
 File indexFile;
 
@@ -19,6 +20,32 @@ void spiffsSetup()
         Serial.println("SPIFFS Mount Failed");
         return;
     }    
+}
+
+bool SDSetup()
+{
+    uint8_t cardType = SD.cardType();
+
+    if(cardType == CARD_NONE){
+        Serial.println("No SD card attached");
+        return false;
+    }
+
+    Serial.print("SD Card Type: ");
+    if(cardType == CARD_MMC){
+        Serial.println("MMC");
+    } else if(cardType == CARD_SD){
+        Serial.println("SDSC");
+    } else if(cardType == CARD_SDHC){
+        Serial.println("SDHC");
+    } else {
+        Serial.println("UNKNOWN");
+    }
+
+    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+    Serial.printf("SD Card Size: %lluMB\n", cardSize);   
+
+    return true; 
 }
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
@@ -89,7 +116,7 @@ void appendFile(fs::FS &fs, const char * path, const char * message, const int l
 bool startReadingIndex()
 {
      StaticJsonDocument<200> *indexDoc = new StaticJsonDocument<200>();
-      indexFile = SPIFFS.open("/index.txt");
+      indexFile = SD.open("/index.txt");
       if(!indexFile || indexFile.isDirectory()){
         Serial.println("- failed to open file for reading");
         return false;
@@ -103,10 +130,8 @@ void endReadingIndex()
     indexFile.close();
 }
 
-StaticJsonDocument<200> readNextIndexConfig()
+void readNextIndexConfig(StaticJsonDocument<200> &indexDoc)
 {
-    StaticJsonDocument<200> indexDoc;
-
     if(indexFile.available())
     {
         String line = indexFile.readStringUntil('\n');
@@ -119,13 +144,12 @@ StaticJsonDocument<200> readNextIndexConfig()
         if (error) {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
-            return indexDoc;
+            return;
         }
-
-        return indexDoc;
+        return;
     }
     
-    return indexDoc;
+    return;
 }
 
 void readFile(fs::FS &fs, const char * path){
