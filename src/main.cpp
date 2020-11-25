@@ -50,6 +50,21 @@ unsigned int readUnsignedIntFromEEPROM(int address)
   return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
 }
 
+void writeUnsignedLongIntoEEPROM(int address, unsigned long number)
+{ 
+  EEPROM.write(address, (number >> 24) & 0xFF);
+  EEPROM.write(address + 1, (number >> 16) & 0xFF);
+  EEPROM.write(address + 2, (number >> 8) & 0xFF);
+  EEPROM.write(address + 3, number & 0xFF);
+}
+unsigned long readUnsignedLongFromEEPROM(int address)
+{
+  return ((unsigned long)EEPROM.read(address) << 24) +
+         ((unsigned long)EEPROM.read(address + 1) << 16) +
+         ((unsigned long)EEPROM.read(address + 2) << 8) +
+         (unsigned long)EEPROM.read(address + 3);
+}
+
 void setup() {
 
     Serial.begin(115200);
@@ -64,14 +79,18 @@ void setup() {
         Serial.println("failed to initialise EEPROM");
     }
 
-    Serial.println("***** Ciao OTA *******");
-    spiffsSetup();
-    currentVersion = readUnsignedIntFromEEPROM(0);
-    if(currentVersion == 65535)
-    { //initial value
+    unsigned long magicKey = ESP.getEfuseMac();
+    unsigned long readKey = readUnsignedLongFromEEPROM(60);
+    if(readKey != magicKey)
+    { // first startup
+        Serial.print("Different magic keys: first startup");
+        writeUnsignedLongIntoEEPROM(60, magicKey);
         currentVersion = 0;
         writeUnsignedIntIntoEEPROM(0, currentVersion);
     }
+
+    spiffsSetup();
+    currentVersion = readUnsignedIntFromEEPROM(0);
 
     Serial.print("Current version: ");Serial.println(currentVersion);
     listDir(activeFS, "/", 0);
@@ -100,6 +119,7 @@ void loop() {
                 if(!doc.isNull())
                 {
                     unsigned int version = doc["id"].as<unsigned int>();
+                    Serial.print("Read version: ");Serial.println(version);
                     if(version <= currentVersion)
                     {
                         Serial.print("Skipping version: ");Serial.println(version);
@@ -115,6 +135,9 @@ void loop() {
                         Serial.println(link);
                         if(downloadFile(link.c_str(), "", activeFS, true))
                         {
+                            currentVersion = version;
+                            Serial.print("Writing version: ");
+                            Serial.println(version);
                             writeUnsignedIntIntoEEPROM(0, version);
                             ESP.restart();
                         }
@@ -132,6 +155,6 @@ void loop() {
 
             endReadingIndex();
         }
-        delay(50000);
+        delay(500000);
     }
 }

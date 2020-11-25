@@ -117,16 +117,18 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             totalSize = 0;
             break;
         case HTTP_EVENT_DISCONNECTED:
+            // this is always called, also on success
             Serial.println("HTTP_EVENT_DISCONNECTED");
             int mbedtls_err = 0;
             receivingFile = false;
             totalSize = 0;
-            if(isOta)
+            if(!success)
             {
-                Update.abort();
+                if(isOta)
+                {
+                    Update.abort();
+                }
             }
-
-            success = false;
          //   esp_err_t err = esp_tls_get_and_clear_last_error(evt->data, &mbedtls_err, NULL);
            // if (err != 0) {
              //   if (output_buffer != NULL) {
@@ -181,11 +183,11 @@ bool downloadFile(const char *link, String fileName, fs::FS &fs, bool isOtaUpdat
     Serial.println("Created esp_http_client_perform");
 
     if (err == ESP_OK) {
-        Serial.print("HTTP chunk encoding OK" );
+        Serial.print("HTTP chunk encoding OK: " );
         Serial.println(esp_http_client_get_status_code(client));
         Serial.println(esp_http_client_get_content_length(client));           
     } else {
-        Serial.print("Error perform http request" );
+        Serial.print("Error perform http request: " );
         Serial.println(esp_err_to_name(err));
     }
 
