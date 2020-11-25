@@ -31,6 +31,7 @@ void setup() {
       //  return;
     }
 
+    //Serial.println("Ciao OTA");
     spiffsSetup();
 
     listDir(activeFS, "/", 0);
@@ -45,11 +46,10 @@ void setup() {
 void loop() {
     if((wifiMulti.run() == WL_CONNECTED)) {
         downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt", activeFS, false);
-        //downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/0011", "/0011.mp3");
 
         listDir(activeFS, "/", 0);   
         readFile(activeFS, "/index.txt");
-        if(startReadingIndex())
+        if(startReadingIndex(activeFS))
         {
             Serial.println("Found lines");
             StaticJsonDocument<200> doc;
@@ -57,10 +57,14 @@ void loop() {
                 readNextIndexConfig(doc);
                 if(!doc.isNull())
                 {
-                    if(doc["type"] == "ota")
+                    if( strcmp(doc["type"], "ota") == 0)
                     {
-                        Serial.print("Found OTA");
-                        downloadFile(strcat(BASE_ADDRESS, doc["link"]), "", activeFS, true);
+                        Serial.print("Found OTA: ");
+                        String link = doc["link"].as<String>();
+                        link = BASE_ADDRESS + link;
+                        Serial.print("Link: ");
+                        Serial.println(link);
+                        downloadFile(link.c_str(), "", activeFS, true);
                     }
                 }
                 else
@@ -69,7 +73,7 @@ void loop() {
                 }
             
                 //delete doc;
-            } while(doc.isNull());
+            } while(!doc.isNull());
 
             Serial.println("End reading");
 

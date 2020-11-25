@@ -12,7 +12,7 @@ void writeFile(fs::FS &fs, const char * path, const char * message, const int le
 void appendFile(fs::FS &fs, const char * path, const char * message, const int len);
 void readFile(fs::FS &fs, const char * path);
 void readNextIndexConfig(StaticJsonDocument<200> &indexDoc);
-bool startReadingIndex();
+bool startReadingIndex(fs::FS &fs);
 void endReadingIndex();
 void deleteIfExists(fs::FS &fs, const char * path);
 #endif

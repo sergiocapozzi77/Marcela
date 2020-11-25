@@ -113,10 +113,10 @@ void appendFile(fs::FS &fs, const char * path, const char * message, const int l
     file.close();
 }
 
-bool startReadingIndex()
+bool startReadingIndex(fs::FS &fs)
 {
      StaticJsonDocument<200> *indexDoc = new StaticJsonDocument<200>();
-      indexFile = SD.open("/index.txt");
+      indexFile = fs.open("/index.txt");
       if(!indexFile || indexFile.isDirectory()){
         Serial.println("- failed to open file for reading");
         return false;

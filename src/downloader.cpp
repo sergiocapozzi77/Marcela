@@ -22,7 +22,7 @@ typedef struct {
 } userData;
 
 static bool receivingFile = false;
-static long totalSize = 0;
+static unsigned int totalSize = 0;
 
 
 
@@ -52,18 +52,19 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             {
                 if(!receivingFile)
                 {
-                    //Serial.printf("Update: %s\n", upload.filename.c_str());
+                    Serial.println("Update OTA [");
                     if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+                        Serial.print("Update begin error: ");
                         Update.printError(Serial);
                     }
                     receivingFile = true;
                 }
-                else
-                {
-                    if (Update.write((uint8_t *)evt->data, evt->data_len) != evt->data_len) {
-                        Update.printError(Serial);
-                    }
+
+                if (Update.write((uint8_t *)evt->data, evt->data_len) != evt->data_len) {
+                    Update.printError(Serial);
                 }
+
+                Serial.print(".");
             }
             else
             {
@@ -106,7 +107,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             if(isOta)
             {
                 if (Update.end(true)) { //true to set the size to the current progress
-                    Serial.printf("Update Success: %u\nRebooting...\n", totalSize);
+                    Serial.printf("] Update Success: %u\nRebooting...\n", totalSize);
+                    ESP.restart();
                 } else {
                     Update.printError(Serial);
                 }
@@ -126,8 +128,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-void downloadFile(const char *link, String fileName, fs::FS fs, bool isOtaUpdate)
+void downloadFile(const char *link, String fileName, fs::FS &fs, bool isOtaUpdate)
 {
+    Serial.print("downloadFile: ");
+    Serial.println(fileName);
+    Serial.print("isOtaUpdate: ");
+    Serial.println(isOtaUpdate);
+    
     isOta = isOtaUpdate;
     // wait for WiFi connection
     receivingFile = false;
