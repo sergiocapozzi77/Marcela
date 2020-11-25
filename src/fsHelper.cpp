@@ -10,6 +10,7 @@ void deleteIfExists(fs::FS &fs, const char * path)
     Serial.printf("deleting: %s\r\n", path);
     if(fs.exists(path))
     {
+        Serial.printf("deleted: %s\r\n", path);
         fs.remove(path);
     }
 }

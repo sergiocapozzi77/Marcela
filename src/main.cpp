@@ -31,7 +31,7 @@ void setup() {
       //  return;
     }
 
-    //Serial.println("Ciao OTA");
+    Serial.println("***** Ciao OTA *******");
     spiffsSetup();
 
     listDir(activeFS, "/", 0);

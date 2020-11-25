@@ -95,7 +95,19 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
         }
         case HTTP_EVENT_ON_FINISH:
             Serial.println("HTTP_EVENT_ON_FINISH");
-            Serial.print("Data: ");
+            
+            if(isOta)
+            {
+                if (Update.end(true)) { //true to set the size to the current progress
+                    Serial.printf("] Update Success: %u\nRebooting...\n", totalSize);
+                    ESP.restart();
+                } else {
+                    Update.printError(Serial);
+                }
+            }
+
+            Serial.printf("Data received: %u", totalSize);
+            Serial.println();
             receivingFile = false;
             totalSize = 0;
             break;
@@ -106,12 +118,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             totalSize = 0;
             if(isOta)
             {
-                if (Update.end(true)) { //true to set the size to the current progress
-                    Serial.printf("] Update Success: %u\nRebooting...\n", totalSize);
-                    ESP.restart();
-                } else {
-                    Update.printError(Serial);
-                }
+                Update.abort();
             }
          //   esp_err_t err = esp_tls_get_and_clear_last_error(evt->data, &mbedtls_err, NULL);
            // if (err != 0) {
