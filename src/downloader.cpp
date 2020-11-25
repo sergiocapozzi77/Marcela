@@ -23,6 +23,7 @@ typedef struct {
 
 static bool receivingFile = false;
 static unsigned int totalSize = 0;
+static unsigned int contentLength = 0;
 
 bool success;
 
@@ -40,11 +41,18 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             break;
         case HTTP_EVENT_ON_HEADER:
             //Serial.println("HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
-            Serial.print("HTTP_EVENT_ON_HEADER: ");
+            if(strcmp(evt->header_key, "Content-Length") == 0)
+            {
+                contentLength = atoi(evt->header_value);
+                Serial.print("Content lenth: ");
+                Serial.println(contentLength);
+            }
+
+            /*Serial.print("HTTP_EVENT_ON_HEADER: ");
             Serial.print(evt->header_key);
             Serial.print(" - ");
             Serial.print(evt->header_value);
-            Serial.println();
+            Serial.println();*/
             break;
         case HTTP_EVENT_ON_DATA:
         {
@@ -53,7 +61,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                 if(!receivingFile)
                 {
                     Serial.println("Update OTA [");
-                    if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+                    if (!Update.begin(contentLength)) { //start with max available size
                         Serial.print("Update begin error: ");
                         Update.printError(Serial);
                     }
