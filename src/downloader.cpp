@@ -10,6 +10,7 @@
 #include "esp_tls.h"
 #include <Update.h>
 #include "fsHelper.h"
+#include "SPIFFS.h"
 
 #define MAX_HTTP_RECV_BUFFER 2048
 
@@ -17,11 +18,13 @@ bool isOta = false;
 
 typedef struct {
     String fileName; 
+    fs::FS *activeFS;
 } userData;
 
 static bool receivingFile = false;
 static long totalSize = 0;
-fs::FS activeFS;
+
+
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -67,7 +70,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                 userData *usrData = (userData *) evt->user_data;
                 if(!receivingFile)
                 {
-                    deleteIfExists(activeFS, usrData->fileName.c_str());
+                    deleteIfExists(*usrData->activeFS, usrData->fileName.c_str());
                 }
 
                 receivingFile = true;
@@ -75,13 +78,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                 if (!esp_http_client_is_chunked_response(evt->client)) {
                 // Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
                 // Serial.println(evt->data_len);
-                    appendFile(activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                    appendFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
                 }
                 else
                 {
                     Serial.print("HTTP_EVENT_ON_DATA NOCHUNK: ");
                     Serial.println(evt->data_len);
-                    writeFile(activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                    writeFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
                 }          
             }
 
@@ -126,13 +129,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 void downloadFile(const char *link, String fileName, fs::FS fs, bool isOtaUpdate)
 {
     isOta = isOtaUpdate;
-    activeFS = fs;
     // wait for WiFi connection
     receivingFile = false;
     totalSize = 0;
 
     userData *user = new userData();
     user->fileName = fileName;
+    user->activeFS = &fs;
 
     esp_http_client_config_t *config = new esp_http_client_config_t();
     //config->url = "http://httpbin.org/stream/1";
