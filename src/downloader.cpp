@@ -8,20 +8,24 @@
 
 #include "esp_http_client.h"
 #include "esp_tls.h"
-
+#include <Update.h>
 #include "fsHelper.h"
 //#include "SPIFFS.h"
 #include "SD.h"
 
 #define MAX_HTTP_RECV_BUFFER 2048
 
+bool isOta = false;
+
 typedef struct {
     String fileName; 
 } userData;
 
+static bool receivingFile = false;
+static long totalSize = 0;
+
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
-    static bool receivingFile = false;
     switch(evt->event_id) {
         case HTTP_EVENT_ERROR:
             Serial.println("HTTP_EVENT_ERROR");
@@ -34,29 +38,55 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             break;
         case HTTP_EVENT_ON_HEADER:
             //Serial.println("HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
-            Serial.println("HTTP_EVENT_ON_HEADER");
+            Serial.print("HTTP_EVENT_ON_HEADER: ");
+            Serial.print(evt->header_key);
+            Serial.print(" - ");
+            Serial.print(evt->header_value);
+            Serial.println();
             break;
         case HTTP_EVENT_ON_DATA:
         {
-            userData *usrData = (userData *) evt->user_data;
-            if(!receivingFile)
+            if(isOta)
             {
-                deleteIfExists(SD, usrData->fileName.c_str());
-            }
-
-            receivingFile = true;
-
-            if (!esp_http_client_is_chunked_response(evt->client)) {
-               // Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
-               // Serial.println(evt->data_len);
-                appendFile(SD, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                if(!receivingFile)
+                {
+                    //Serial.printf("Update: %s\n", upload.filename.c_str());
+                    if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+                        Update.printError(Serial);
+                    }
+                    receivingFile = true;
+                }
+                else
+                {
+                    if (Update.write((uint8_t *)evt->data, evt->data_len) != evt->data_len) {
+                        Update.printError(Serial);
+                    }
+                }
             }
             else
             {
-                Serial.print("HTTP_EVENT_ON_DATA NOCHUNK: ");
-                Serial.println(evt->data_len);
-                writeFile(SD, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
-            }          
+                userData *usrData = (userData *) evt->user_data;
+                if(!receivingFile)
+                {
+                    deleteIfExists(SD, usrData->fileName.c_str());
+                }
+
+                receivingFile = true;
+
+                if (!esp_http_client_is_chunked_response(evt->client)) {
+                // Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
+                // Serial.println(evt->data_len);
+                    appendFile(SD, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                }
+                else
+                {
+                    Serial.print("HTTP_EVENT_ON_DATA NOCHUNK: ");
+                    Serial.println(evt->data_len);
+                    writeFile(SD, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                }          
+            }
+
+            totalSize += evt->data_len;
 
             break;
         }
@@ -64,11 +94,21 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             Serial.println("HTTP_EVENT_ON_FINISH");
             Serial.print("Data: ");
             receivingFile = false;
+            totalSize = 0;
             break;
         case HTTP_EVENT_DISCONNECTED:
             Serial.println("HTTP_EVENT_DISCONNECTED");
             int mbedtls_err = 0;
             receivingFile = false;
+            totalSize = 0;
+            if(isOta)
+            {
+                if (Update.end(true)) { //true to set the size to the current progress
+                    Serial.printf("Update Success: %u\nRebooting...\n", totalSize);
+                } else {
+                    Update.printError(Serial);
+                }
+            }
          //   esp_err_t err = esp_tls_get_and_clear_last_error(evt->data, &mbedtls_err, NULL);
            // if (err != 0) {
              //   if (output_buffer != NULL) {
@@ -84,9 +124,12 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-void downloadFile(const char *link, String fileName)
+void downloadFile(const char *link, String fileName, bool isOtaUpdate)
 {
+    isOta = isOtaUpdate;
     // wait for WiFi connection
+    receivingFile = false;
+    totalSize = 0;
 
     userData *user = new userData();
     user->fileName = fileName;

@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-void downloadFile(const char *link, String fileName);
+void downloadFile(const char *link, String fileName, bool isOta);
 
 #endif

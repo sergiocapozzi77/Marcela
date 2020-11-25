@@ -22,13 +22,13 @@ const char* password = "hszdtubp";
 void setup() {
 
     Serial.begin(115200);
-
+    Serial.println("Ciao OTA");
     if(!SDSetup())
     {
         Serial.println("Unable to read SD");
-        return;
+      //  return;
     }
-    
+
     spiffsSetup();
 
     listDir(SD, "/", 0);
@@ -42,7 +42,7 @@ void setup() {
 
 void loop() {
     if((wifiMulti.run() == WL_CONNECTED)) {
-        downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt");
+        downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt", false);
         //downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/0011", "/0011.mp3");
 
         listDir(SD, "/", 0);   
