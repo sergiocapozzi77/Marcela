@@ -45,6 +45,8 @@ void setup() {
 
 void loop() {
     if((wifiMulti.run() == WL_CONNECTED)) {
+        listDir(activeFS, "/", 0); 
+        
         downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt", activeFS, false);
 
         listDir(activeFS, "/", 0);   
