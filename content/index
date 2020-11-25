@@ -1,1 +1,1 @@
-{ type: "mp3", link:"0011", target:"/0011.mp3" }
+{ "type": "mp3", "link":"0011", "target":"/0011.mp3" }

@@ -40,8 +40,34 @@ void loop() {
         downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt");
         //downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/0011", "/0011.mp3");
     }
-    
+       
     listDir(SPIFFS, "/", 0);   
-    readFile(SPIFFS, "/index.txt");    
+    readFile(SPIFFS, "/index.txt");
+    if(startReadingIndex())
+    {
+        Serial.println("Found lines");
+        StaticJsonDocument<200> doc;
+        do {
+            doc = readNextIndexConfig();
+            if(doc.isNull())
+            {
+                if(doc.containsKey("type"))
+                {
+                    Serial.print("Found type: ");
+                    String type = doc["sd"].as<String>();
+                    //Serial.println(operator["type"].c_str);
+                }
+            }
+            else
+            {
+                Serial.println("doc is null");
+            }
+        
+            //delete doc;
+        } while(doc.isNull());
+        Serial.println("End reading");
+
+        endReadingIndex();
+    }
     delay(50000);
 }

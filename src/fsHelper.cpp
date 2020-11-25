@@ -1,7 +1,6 @@
 #include "fsHelper.h"
 
 #include "SPIFFS.h"
-#include <ArduinoJson.h>
 #define FORMAT_SPIFFS_IF_FAILED true
 File indexFile;
 
@@ -104,27 +103,29 @@ void endReadingIndex()
     indexFile.close();
 }
 
-StaticJsonDocument<200> *readNextIndexConfig()
+StaticJsonDocument<200> readNextIndexConfig()
 {
-    StaticJsonDocument<200> *indexDoc = new StaticJsonDocument<200>();
-    
+    StaticJsonDocument<200> indexDoc;
+
     if(indexFile.available())
     {
         String line = indexFile.readStringUntil('\n');
+        Serial.print("Reading: ");
+        Serial.println(line);
         // Deserialize the JSON document
-        DeserializationError error = deserializeJson(*indexDoc, line.c_str());
+        DeserializationError error = deserializeJson(indexDoc, line.c_str());
 
         // Test if parsing succeeds.
         if (error) {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
-            return NULL;
+            return indexDoc;
         }
 
         return indexDoc;
     }
     
-    return NULL;
+    return indexDoc;
 }
 
 void readFile(fs::FS &fs, const char * path){
