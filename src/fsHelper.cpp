@@ -25,6 +25,11 @@ void spiffsSetup()
 
 bool SDSetup()
 {
+    if(!SD.begin()){
+        Serial.println("Card Mount Failed");
+        return false;
+    }
+
     uint8_t cardType = SD.cardType();
 
     if(cardType == CARD_NONE){

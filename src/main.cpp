@@ -19,7 +19,7 @@ WiFiMulti wifiMulti;
 const char* ssid = "99BB Hyperoptic 1Gbps Broadband";
 const char* password = "hszdtubp";
 
-fs::FS activeFS = SPIFFS;
+fs::FS activeFS = SD;
 #define BASE_ADDRESS "https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/"
 
 unsigned int currentVersion = 0;
@@ -31,7 +31,8 @@ void setup() {
     if(!SDSetup())
     {
         Serial.println("Unable to read SD");
-      //  return;
+        delay(3000);
+        ESP.restart();
     }
 
     if(!NVS.begin())
@@ -46,7 +47,7 @@ void setup() {
     uint64_t readKey = NVS.getInt("mac");
     if(readKey != magicKey)
     { // first startup
-        Serial.print("Different magic keys: first startup");
+        Serial.println("Different magic keys: first startup");
         NVS.setInt("mac", magicKey);
         currentVersion = 0;
         NVS.setInt("version", currentVersion);
@@ -63,6 +64,38 @@ void setup() {
     Serial.println();
 
     wifiMulti.addAP(ssid, password);
+}
+
+void manageOTA(uint32_t version, String link)
+{
+    Serial.print("Found OTA");
+    if(downloadFile(link.c_str(), "", activeFS, true))
+    {
+        currentVersion = version;
+        Serial.print("Writing version: ");
+        Serial.println(version);
+        NVS.setInt("version", version);
+        ESP.restart();
+    }
+}
+
+void manage_mp3(uint32_t version, String link, JsonDocument &doc)
+{
+    Serial.print("Found mp3");
+    if(!doc.containsKey("target"))
+    {
+        Serial.println("mp3 config has no target");
+        return;
+    }
+
+    if(downloadFile(link.c_str(), doc["target"].as<String>(), activeFS, false))
+    {
+        currentVersion = version;
+        Serial.print("Writing version: ");
+        Serial.println(version);
+        NVS.setInt("version", version);
+        Serial.println("mp3 downloaded");
+    }
 }
 
 void loop() {
@@ -89,21 +122,17 @@ void loop() {
                         continue;
                     }
 
+                    String link = doc["link"].as<String>();
+                    link = BASE_ADDRESS + link;
+                    Serial.print("Link: ");
+                    Serial.println(link);
                     if( strcmp(doc["type"], "ota") == 0)
                     {
-                        Serial.print("Found OTA: ");
-                        String link = doc["link"].as<String>();
-                        link = BASE_ADDRESS + link;
-                        Serial.print("Link: ");
-                        Serial.println(link);
-                        if(downloadFile(link.c_str(), "", activeFS, true))
-                        {
-                            currentVersion = version;
-                            Serial.print("Writing version: ");
-                            Serial.println(version);
-                            NVS.setInt("version", version);
-                            ESP.restart();
-                        }
+                        manageOTA(version, link);
+                    }
+                    else if( strcmp(doc["type"], "mp3") == 0)
+                    {
+                        manage_mp3(version, link, doc);
                     }
                 }
                 else

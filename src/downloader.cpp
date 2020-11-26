@@ -71,8 +71,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                 if (Update.write((uint8_t *)evt->data, evt->data_len) != evt->data_len) {
                     Update.printError(Serial);
                 }
-
-                Serial.print(".");
             }
             else
             {
@@ -80,6 +78,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                 if(!receivingFile)
                 {
                     deleteIfExists(*usrData->activeFS, usrData->fileName.c_str());
+                    Serial.print("Downloading: ");
+                    Serial.println(usrData->fileName);
                 }
 
                 receivingFile = true;
@@ -96,6 +96,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                     writeFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
                 }          
             }
+
+            Serial.print(".");
 
             totalSize += evt->data_len;
 
