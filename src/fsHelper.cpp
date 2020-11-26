@@ -5,14 +5,16 @@
 #define FORMAT_SPIFFS_IF_FAILED true
 File indexFile;
 
-void deleteIfExists(fs::FS &fs, const char * path)
+bool deleteIfExists(fs::FS &fs, const char * path)
 {
     Serial.printf("deleting: %s\r\n", path);
     if(fs.exists(path))
     {
         Serial.printf("deleted: %s\r\n", path);
-        fs.remove(path);
+        return fs.remove(path);
     }
+
+    return true;
 }
 
 void spiffsSetup()
@@ -51,6 +53,12 @@ bool SDSetup()
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
     Serial.printf("SD Card Size: %lluMB\n", cardSize);   
 
+    if(!SD.exists("/mp3"))
+    {
+        SD.mkdir("/mp3");
+        Serial.println("Created mp3 folder");
+    }
+
     return true; 
 }
 
@@ -85,38 +93,44 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
     }
 }
 
-void writeFile(fs::FS &fs, const char * path, const char * message, const int len){
+bool writeFile(fs::FS &fs, const char * path, const char * message, const int len){
     Serial.printf("Writing file: %s\r\n", path);
 
+    bool ret = false;
     File file = fs.open(path, FILE_WRITE);
     if(!file){
         Serial.println("- failed to open file for writing");
-        return;
+        return false;
     }
     if(file.write((uint8_t *) message, len)){
         Serial.println("- file written");
+        ret = true;
     } else {
         Serial.println("- frite failed");
     }
 
     file.close();
+
+    return ret;
 }
 
-void appendFile(fs::FS &fs, const char * path, const char * message, const int len){
+bool appendFile(fs::FS &fs, const char * path, const char * message, const int len){
     //Serial.printf("Appending to file: %s\r\n", path);
-
+    bool ret = false;
     File file = fs.open(path, FILE_APPEND);
     if(!file){
         Serial.println("- failed to open file for appending");
-        return;
+        return ret;
     }
     if(file.write((uint8_t *) message, len)){
-    //    Serial.println("- message appended");
+        ret = true;
     } else {
         Serial.println("- append failed");
     }
 
     file.close();
+
+    return ret;
 }
 
 bool startReadingIndex(fs::FS &fs)
@@ -153,6 +167,10 @@ void readNextIndexConfig(StaticJsonDocument<200> &indexDoc)
             return;
         }
         return;
+    }
+    else
+    {
+        indexDoc = StaticJsonDocument<200>();
     }
     
     return;

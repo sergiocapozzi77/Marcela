@@ -22,6 +22,7 @@ typedef struct {
 } userData;
 
 static bool receivingFile = false;
+static bool writeOk = true;
 static unsigned int totalSize = 0;
 static unsigned int contentLength = 0;
 
@@ -74,10 +75,20 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             }
             else
             {
+                if(!writeOk)
+                {
+                    return ESP_FAIL;
+                }
+
                 userData *usrData = (userData *) evt->user_data;
                 if(!receivingFile)
                 {
-                    deleteIfExists(*usrData->activeFS, usrData->fileName.c_str());
+                    if(!deleteIfExists(*usrData->activeFS, usrData->fileName.c_str()))
+                    {
+                        writeOk = false;
+                        return ESP_FAIL;
+                    }
+
                     Serial.print("Downloading: ");
                     Serial.println(usrData->fileName);
                 }
@@ -87,13 +98,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                 if (!esp_http_client_is_chunked_response(evt->client)) {
                 // Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
                 // Serial.println(evt->data_len);
-                    appendFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                    writeOk = appendFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
                 }
                 else
                 {
                     Serial.print("HTTP_EVENT_ON_DATA NOCHUNK: ");
                     Serial.println(evt->data_len);
-                    writeFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                    writeOk = writeFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
                 }          
             }
 
@@ -118,7 +129,10 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             }
             else
             {
-                success = true;
+                if(writeOk)
+                {
+                    success = true;
+                }
             }
 
             Serial.printf("Data received: %u", totalSize);
@@ -157,6 +171,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 bool downloadFile(const char *link, String fileName, fs::FS &fs, bool isOtaUpdate)
 {
     success = false;
+    writeOk = true;
     Serial.print("downloadFile: ");
     Serial.println(fileName);
     Serial.print("isOtaUpdate: ");
