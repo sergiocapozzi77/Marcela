@@ -98,14 +98,21 @@ void manage_mp3(uint32_t version, String link, JsonDocument &doc)
     }
 }
 
+void downloadIndex()
+{
+    String indexLink = "index";
+    indexLink = BASE_ADDRESS + indexLink;
+    downloadFile(indexLink.c_str(), "/index.txt", activeFS, false);
+    listDir(activeFS, "/", 0);   
+    readFile(activeFS, "/index.txt");
+}
+
 void loop() {
     if((wifiMulti.run() == WL_CONNECTED)) {
         listDir(activeFS, "/", 0); 
 
-        downloadFile("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/index", "/index.txt", activeFS, false);
+        downloadIndex();
 
-        listDir(activeFS, "/", 0);   
-        readFile(activeFS, "/index.txt");
         if(startReadingIndex(activeFS))
         {
             Serial.println("Found lines");
@@ -140,7 +147,6 @@ void loop() {
                     Serial.println("doc is null");
                 }
             
-                //delete doc;
             } while(!doc.isNull());
 
             Serial.println("End reading");
