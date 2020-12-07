@@ -25,6 +25,7 @@ static bool receivingFile = false;
 static bool writeOk = true;
 static unsigned int totalSize = 0;
 static unsigned int contentLength = 0;
+File fileToDownload;
 
 bool success;
 
@@ -91,6 +92,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 
                     Serial.print("Downloading: ");
                     Serial.println(usrData->fileName);
+
+                    fileToDownload = openFile(*usrData->activeFS, usrData->fileName.c_str());
+                    if(!fileToDownload)
+                    {
+                        writeOk = false;
+                        return ESP_FAIL;
+                    }
                 }
 
                 receivingFile = true;
@@ -98,7 +106,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                 if (!esp_http_client_is_chunked_response(evt->client)) {
                 // Serial.print("HTTP_EVENT_ON_DATA CHUNK: ");
                 // Serial.println(evt->data_len);
-                    writeOk = appendFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
+                    writeOk = appendFile(fileToDownload, (char *) evt->data, evt->data_len);
                 }
                 else
                 {
@@ -116,7 +124,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
         }
         case HTTP_EVENT_ON_FINISH:
             Serial.println("HTTP_EVENT_ON_FINISH");
-            
+            closeFile(fileToDownload);
+
             if(isOta)
             {
                 if (Update.end(true)) { //true to set the size to the current progress
@@ -129,6 +138,15 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             }
             else
             {
+                if(contentLength > 0 && contentLength == totalSize)
+                {
+                    success = true;                    
+                }
+                else
+                {
+                    Serial.printf("Write error. Planned to receive %u but received", contentLength, totalSize);
+                }
+
                 if(writeOk)
                 {
                     success = true;
@@ -171,7 +189,9 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 bool downloadFile(const char *link, String fileName, fs::FS &fs, bool isOtaUpdate)
 {
     success = false;
+    fileToDownload = (File) NULL;
     writeOk = true;
+    contentLength = -1;
     Serial.print("downloadFile: ");
     Serial.println(fileName);
     Serial.print("isOtaUpdate: ");

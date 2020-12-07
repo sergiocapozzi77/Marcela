@@ -114,21 +114,33 @@ bool writeFile(fs::FS &fs, const char * path, const char * message, const int le
     return ret;
 }
 
-bool appendFile(fs::FS &fs, const char * path, const char * message, const int len){
-    //Serial.printf("Appending to file: %s\r\n", path);
-    bool ret = false;
+File openFile(fs::FS &fs, const char * path)
+{
     File file = fs.open(path, FILE_APPEND);
     if(!file){
         Serial.println("- failed to open file for appending");
-        return ret;
+        return (File) NULL;
     }
+
+    return file;
+}
+
+void closeFile(File file)
+{
+    file.flush();
+    file.close();
+    Serial.println("Closing file");
+}
+
+bool appendFile(File file, const char * message, const int len){
+    //Serial.printf("Appending to file: %s\r\n", path);
+ 
+    bool ret = false;
     if(file.write((uint8_t *) message, len)){
         ret = true;
     } else {
         Serial.println("- append failed");
     }
-
-    file.close();
 
     return ret;
 }
