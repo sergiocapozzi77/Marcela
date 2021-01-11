@@ -53,6 +53,47 @@ void printLocalTime()
   Serial.println(timeStringBuff);
 }
 
+void manageOTA(uint32_t version, String link)
+{
+    Serial.println("Found OTA");
+    if(downloadFile(link.c_str(), "", activeFS, true))
+    {
+        currentVersion = version;
+        Serial.print("Writing version: ");
+        Serial.println(version);
+        NVS.setInt("version", version);
+        ESP.restart();
+    }
+}
+
+void manage_mp3(uint32_t version, String link, JsonDocument &doc)
+{
+    Serial.println("Found mp3");
+    if(!doc.containsKey("target"))
+    {
+        Serial.println("mp3 config has no target");
+        return;
+    }
+
+    if(downloadFile(link.c_str(), doc["target"].as<String>(), activeFS, false))
+    {
+        currentVersion = version;
+        //NVS.setInt("version", version);
+        Serial.print("Writing version: ");
+        Serial.println(version);
+        Serial.println("mp3 downloaded");
+    }
+}
+
+void downloadIndex()
+{
+    String indexLink = "index";
+    indexLink = BASE_ADDRESS + indexLink;
+    downloadFile(indexLink.c_str(), "/index.txt", activeFS, false);
+    listDir(activeFS, "/", 0);   
+    readFile(activeFS, "/index.txt");
+}
+
 void updateAll()
 {
     listDir(activeFS, "/", 0); 
@@ -166,53 +207,12 @@ void setup() {
     updateAll();
     digitalWrite (2, LOW);
     //Serial.println("Singing");
-    //play("/mp3/jbells.mp3");
-}
-
-void manageOTA(uint32_t version, String link)
-{
-    Serial.println("Found OTA");
-    if(downloadFile(link.c_str(), "", activeFS, true))
-    {
-        currentVersion = version;
-        Serial.print("Writing version: ");
-        Serial.println(version);
-        NVS.setInt("version", version);
-        ESP.restart();
-    }
-}
-
-void manage_mp3(uint32_t version, String link, JsonDocument &doc)
-{
-    Serial.println("Found mp3");
-    if(!doc.containsKey("target"))
-    {
-        Serial.println("mp3 config has no target");
-        return;
-    }
-
-    if(downloadFile(link.c_str(), doc["target"].as<String>(), activeFS, false))
-    {
-        currentVersion = version;
-        //NVS.setInt("version", version);
-        Serial.print("Writing version: ");
-        Serial.println(version);
-        Serial.println("mp3 downloaded");
-    }
-}
-
-void downloadIndex()
-{
-    String indexLink = "index";
-    indexLink = BASE_ADDRESS + indexLink;
-    downloadFile(indexLink.c_str(), "/index.txt", activeFS, false);
-    listDir(activeFS, "/", 0);   
-    readFile(activeFS, "/index.txt");
+    play("/mp3/LastChristmas.mp3");
 }
 
 void loop() {
     loopPlayer();
-    
+
 /*
     
     if((wifiMulti.run() == WL_CONNECTED)) {
