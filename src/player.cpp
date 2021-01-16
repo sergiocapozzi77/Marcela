@@ -3,17 +3,25 @@
 #include "AudioFileSourceSD.h"
 #include "AudioGeneratorMP3.h"
 #include "AudioGeneratorWav.h"
-#include "AudioOutputI2SNoDAC.h"
+#include "AudioOutputI2S.h"
 
 AudioGeneratorMP3 *mp3;
 AudioFileSourceSD *fileToPlay;
-AudioOutputI2SNoDAC *out;
+AudioOutputI2S *out;
+
+// Digital I/O used
+#define I2S_DOUT      25
+#define I2S_BCLK      27
+#define I2S_LRC       26
 
 void setupPlayer()
 {
     fileToPlay = new AudioFileSourceSD();
-    out = new AudioOutputI2SNoDAC();
+    out = new AudioOutputI2S();
     mp3 = new AudioGeneratorMP3();
+
+    out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+
 }
 
 void play(const char *fileName)
@@ -41,9 +49,9 @@ void loopPlayer()
         if (!mp3->loop())
             mp3->stop();
     }
-    else
+  /*  else
     {
         Serial.printf("MP3 done\n");
         delay(1000);
-    }
+    }*/
 }

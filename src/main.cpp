@@ -7,8 +7,7 @@
 
 #include <Arduino.h>
 #include <ArduinoNvs.h> 
-#include <WiFi.h>
-#include <WiFiMulti.h>
+#include <WiFiManager.h>
 
 #include "downloader.h"
 #include "fsHelper.h"
@@ -22,9 +21,8 @@ const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
 
-WiFiMulti wifiMulti;
-const char* ssid = "99BB Hyperoptic 1Gbps Broadband";
-const char* password = "hszdtubp";
+//const char* ssid = "99BB Hyperoptic 1Gbps Broadband";
+//const char* password = "hszdtubp";
 
 fs::FS activeFS = SD;
 #define BASE_ADDRESS "https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/"
@@ -78,7 +76,7 @@ void manage_mp3(uint32_t version, String link, JsonDocument &doc)
     if(downloadFile(link.c_str(), doc["target"].as<String>(), activeFS, false))
     {
         currentVersion = version;
-        //NVS.setInt("version", version);
+        NVS.setInt("version", version);
         Serial.print("Writing version: ");
         Serial.println(version);
         Serial.println("mp3 downloaded");
@@ -193,14 +191,34 @@ void setup() {
     Serial.println();
     Serial.println();
 
-    wifiMulti.addAP(ssid, password);
-
     Serial.println("Setting up player");
     setupPlayer();
 
-    while(wifiMulti.run() != WL_CONNECTED) {
-        Serial.println("waiting for connection");
-        delay(1000);
+    WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
+
+    //WiFiManager, Local intialization. Once its business is done, there is no need to keep it around
+    WiFiManager wm;
+
+    //reset settings - wipe credentials for testing
+    //wm.resetSettings();
+
+    // Automatically connect using saved credentials,
+    // if connection fails, it starts an access point with the specified name ( "AutoConnectAP"),
+    // if empty will auto generate SSID, if password is blank it will be anonymous AP (wm.autoConnect())
+    // then goes into a blocking loop awaiting configuration and will return success result
+
+    bool res;
+    // res = wm.autoConnect(); // auto generated AP name from chipid
+    // res = wm.autoConnect("AutoConnectAP"); // anonymous ap
+    res = wm.autoConnect("SergioToy"); // password protected ap
+
+    if(!res) {
+        Serial.println("Failed to connect");
+        ESP.restart();
+    } 
+    else {
+        //if you get here you have connected to the WiFi    
+        Serial.println("connected...yeey :)");
     }
 
     digitalWrite (2, HIGH);
