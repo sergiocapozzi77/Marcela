@@ -1,8 +1,6 @@
 #include "fsHelper.h"
 
-#include "SPIFFS.h"
 #include "SD.h"
-#define FORMAT_SPIFFS_IF_FAILED true
 File indexFile;
 
 bool deleteIfExists(fs::FS &fs, const char * path)
@@ -15,14 +13,6 @@ bool deleteIfExists(fs::FS &fs, const char * path)
     }
 
     return true;
-}
-
-void spiffsSetup()
-{
-    if(!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)){
-        Serial.println("SPIFFS Mount Failed");
-        return;
-    }    
 }
 
 bool SDSetup()

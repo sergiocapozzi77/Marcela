@@ -29,6 +29,8 @@ const int   daylightOffset_sec = 3600;
 fs::FS activeFS = SD;
 #define BASE_ADDRESS "https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/"
 
+#define MAX_FAILURES 5
+
 unsigned int currentVersion = 0;
 unsigned int cycles = 0;
 
@@ -53,7 +55,7 @@ void printLocalTime()
   Serial.println(timeStringBuff);
 }
 
-void manageOTA(uint32_t version, String link)
+bool manageOTA(uint32_t version, String link)
 {
     Serial.println("Found OTA");
     if(downloadFile(link.c_str(), "", activeFS, true))
@@ -64,42 +66,68 @@ void manageOTA(uint32_t version, String link)
         NVS.setInt("version", version);
         ESP.restart();
     }
+
+    return false;
 }
 
-void manage_mp3(uint32_t version, String link, JsonDocument &doc)
+bool manage_mp3(uint32_t version, String link, JsonDocument &doc)
 {
     Serial.println("Found mp3");
     if(!doc.containsKey("target"))
     {
         Serial.println("mp3 config has no target");
-        return;
+        return false;
     }
 
     if(downloadFile(link.c_str(), doc["target"].as<String>(), activeFS, false))
     {
-        currentVersion = version;
-        NVS.setInt("version", version);
-        Serial.print("Writing version: ");
-        Serial.println(version);
         Serial.println("mp3 downloaded");
+        return true;
     }
+
+    return false;
 }
 
-void downloadIndex()
+
+bool deleteFile(uint32_t version, JsonDocument &doc)
+{
+    Serial.println("Found deleteFile");
+    if(!doc.containsKey("target"))
+    {
+        Serial.println("mp3 config has no target");
+        return false;
+    }
+
+    String target = doc["target"].as<String>();
+    deleteIfExists(activeFS, target.c_str());
+
+    return true;
+}
+
+bool downloadIndex()
 {
     String indexLink = "index";
     indexLink = BASE_ADDRESS + indexLink;
-    downloadFile(indexLink.c_str(), "/index.txt", activeFS, false);
+    if(!downloadFile(indexLink.c_str(), "/index.txt", activeFS, false))
+    {
+        return false;
+    }
+
     listDir(activeFS, "/", 0);   
     readFile(activeFS, "/index.txt");
 }
 
-void updateAll()
+bool updateAll()
 {
     listDir(activeFS, "/", 0); 
 
-    downloadIndex();
+    if(!downloadIndex())
+    {
+        return false;
+    }
 
+    int consecutiveFailures = 0;
+    
     if(startReadingIndex(activeFS))
     {
         Serial.println("Found lines");
@@ -120,16 +148,38 @@ void updateAll()
                 link = BASE_ADDRESS + link;
                 Serial.print("Link: ");
                 Serial.println(link);
+                bool result = false;
                 if( strcmp(doc["type"], "ota") == 0)
                 {
-                    manageOTA(version, link);
+                    result = manageOTA(version, link);
                 }
                 else if( strcmp(doc["type"], "mp3") == 0)
                 {
-                    currentVersion = version;
-                    manage_mp3(version, link, doc);
-                    play("/mp3/jbells.mp3");
+                    result = manage_mp3(version, link, doc);
                 }
+                else if( strcmp(doc["type"], "del") == 0)
+                {
+                    currentVersion = version;
+                    result = deleteFile(version, doc);
+                }
+
+                if(result)
+                {
+                    consecutiveFailures = 0;
+                    currentVersion = version;
+                    NVS.setInt("version", version);
+                    Serial.print("Writing version: ");
+                    Serial.println(version);
+                }
+                else
+                {
+                    consecutiveFailures++;
+                    if(consecutiveFailures > MAX_FAILURES)
+                    {
+                        return false;
+                    }
+                }
+                
             }
             else
             {
@@ -144,6 +194,8 @@ void updateAll()
     }
 
     listDir(activeFS, "/mp3", 0);
+
+    return true;
 }
 
 void setup() {
@@ -182,7 +234,8 @@ void setup() {
     Serial.print("*** Time read: ");
     Serial.println(tm);
 
-    spiffsSetup();
+    setupSleep();
+
     currentVersion = NVS.getInt("version");
 
     Serial.print("Current version: ");Serial.println(currentVersion);
@@ -232,9 +285,9 @@ void setup() {
 
 void loop() {
     bool isPlaying = loopPlayer();
-  if(but0->isPressed())
-  {
-  }
+    if(but0->isPressed())
+    {
+    }
 /*
     
     if((wifiMulti.run() == WL_CONNECTED)) {

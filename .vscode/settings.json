@@ -2,6 +2,7 @@
     "files.associations": {
         "new": "cpp",
         "functional": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "algorithm": "cpp"
     }
 }
