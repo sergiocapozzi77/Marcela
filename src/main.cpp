@@ -8,6 +8,8 @@
 #include <Arduino.h>
 #include <ArduinoNvs.h> 
 #include <WiFiManager.h>
+#include "EmmaButton.h"
+#include "EmmaSleep.h"
 
 #include "downloader.h"
 #include "fsHelper.h"
@@ -33,7 +35,7 @@ unsigned int cycles = 0;
 const uint64_t uS_TO_S_FACTOR = 1000000;  /* Conversion factor for micro seconds to seconds */
 const uint64_t TIME_TO_SLEEP = 3600;        /* Time ESP32 will go to sleep (in seconds) */
 
-
+EmmaButton *but0 = new EmmaButton(T0);
 
 void printLocalTime()
 {
@@ -225,12 +227,14 @@ void setup() {
     updateAll();
     digitalWrite (2, LOW);
     //Serial.println("Singing");
-    play("/mp3/LastChristmas.mp3");
+    play("/mp3/EarthWindFire.mp3");
 }
 
 void loop() {
-    loopPlayer();
-
+    bool isPlaying = loopPlayer();
+  if(but0->isPressed())
+  {
+  }
 /*
     
     if((wifiMulti.run() == WL_CONNECTED)) {
@@ -252,4 +256,6 @@ void loop() {
       //  esp_deep_sleep_start();
 
     }*/
+
+    checkSleep();
 }

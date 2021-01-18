@@ -62,10 +62,45 @@ bool SDSetup()
     return true; 
 }
 
+void getDirContent(fs::FS &fs, const char * dirname, int &count, String* files){
+    count = 0;
+
+    File root = fs.open(dirname);
+    if(!root){
+        Serial.println("- failed to open directory");
+        return;
+    }
+    if(!root.isDirectory()){
+        Serial.println(" - not a directory");
+        return;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(!file.isDirectory()){
+            Serial.print("  FILE: ");
+            Serial.print(file.name());
+            Serial.print("\tSIZE: ");
+            Serial.println(file.size());
+
+            files[count++] = String(file.name());
+        }
+        file = root.openNextFile();
+    }
+}
+
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
     Serial.printf("Listing directory: %s\r\n", dirname);
 
-    File root = fs.open(dirname);
+    int count;
+    String files[255];
+    getDirContent(fs, dirname, count, files);
+    for(int i = 0; i < count; i++)
+    {
+        Serial.print("  FILE: ");
+        Serial.println(files[i]);
+    }
+  /*  File root = fs.open(dirname);
     if(!root){
         Serial.println("- failed to open directory");
         return;
@@ -90,7 +125,7 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
             Serial.println(file.size());
         }
         file = root.openNextFile();
-    }
+    }*/
 }
 
 bool writeFile(fs::FS &fs, const char * path, const char * message, const int len){

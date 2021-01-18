@@ -42,13 +42,17 @@ void play(const char *fileName)
     }
 }
 
-void loopPlayer()
+bool loopPlayer()
 {
     if (mp3->isRunning())
     {
         if (!mp3->loop())
             mp3->stop();
+
+        return true;
     }
+    
+    return false;
   /*  else
     {
         Serial.printf("MP3 done\n");

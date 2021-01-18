@@ -3,5 +3,5 @@
 
 void setupPlayer();
 void play(const char *fileName);
-void loopPlayer();
+bool loopPlayer();
 #endif
