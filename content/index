@@ -3,8 +3,8 @@
 { id:4, "type": "mp3", "link":"0011", "target":"/mp3/0013.mp3" }
 { id:6, "type": "mp3", "link":"EarthWindFire.mp3", "target":"/mp3/EarthWindFire.mp3" }
 { id:7, "type": "del", "target":"/mp3/EarthWindFire.mp3" }
-{ id:8, "type": "mp3", "link":"0011", "target":"/mp3/0006.mp3" }
-{ id:9, "type": "mp3", "link":"0011", "target":"/mp3/0007.mp3" }
-{ id:10, "type": "mp3", "link":"0011", "target":"/mp3/0008.mp3" }
-{ id:11, "type": "mp3", "link":"0011", "target":"/mp3/0009.mp3" }
+{ id:8, "type": "mp3", "link":"0006", "target":"/mp3/0006.mp3" }
+{ id:9, "type": "mp3", "link":"0007", "target":"/mp3/0007.mp3" }
+{ id:10, "type": "mp3", "link":"0008", "target":"/mp3/0008.mp3" }
+{ id:11, "type": "mp3", "link":"0009", "target":"/mp3/0009.mp3" }
 
