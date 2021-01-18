@@ -5,6 +5,7 @@
 #include "AudioGeneratorWav.h"
 #include "AudioOutputI2S.h"
 #include "fsHelper.h"
+#include "common.h"
 
 AudioGeneratorMP3 *mp3;
 AudioFileSourceSD *fileToPlay;
@@ -26,7 +27,7 @@ void setupPlayer()
 
     out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
 
-    getDirContent(SD, "/mp3", mp3FilesCount, mp3Files);
+    getDirContent(activeFS, "/mp3", mp3FilesCount, mp3Files);
 }
 
 void play(const char *fileName)
