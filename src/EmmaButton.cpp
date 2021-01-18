@@ -1,6 +1,6 @@
+#include <Arduino.h>
 #include "EmmaButton.h"
 #include "EmmaSleep.h"
-#include <Arduino.h>
 
 EmmaButton::EmmaButton(int id)
 {
