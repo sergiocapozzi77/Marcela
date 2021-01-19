@@ -6,3 +6,5 @@
 { id:17, "type": "del", "target":"/mp3/LastChristmas.mp3" }
 { id:18, "type": "del", "target":"/0011.mp3" }
 { id:19, "type": "mp3", "link":"LastChristmas.mp3", "target":"/mp3/LastChristmas.mp3" }
+{ id:20, "type": "mp3", "link":"0011", "target":"/mp3/0011.wav" }
+{ id:21, "type": "mp3", "link":"0012", "target":"/mp3/0012.wav" }

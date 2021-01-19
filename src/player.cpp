@@ -99,7 +99,10 @@ bool loopPlayer()
     if (audio->isRunning())
     {
         if (!audio->loop())
+        {
             audio->stop();
+          //  Serial.println("stopping");
+        }
 
         return true;
     }

@@ -15,7 +15,7 @@
 #include "fsHelper.h"
 #include "SD.h"
 
-#include "player.h"
+#include "player2.h"
 #include "time.h"
 #include "common.h"
 #include "ContentManager.h"
@@ -86,7 +86,7 @@ void setup() {
     Serial.println();
 
     Serial.println("Setting up player");
-    setupPlayer();
+    setupPlayer2();
 
     WiFi.mode(WIFI_AP_STA); // explicitly set mode, esp defaults to STA+AP
 
@@ -119,11 +119,11 @@ void setup() {
     updateAll();
     digitalWrite (2, LOW);
     //Serial.println("Singing");
-     playRandomEffect();
+    playFile2("/mp3/008.mp3");
 }
 
 void loop() {
-     bool isPlaying = loopPlayer();
+     bool isPlaying = loopPlayer2();
   /*  if(but0->isPressed())
     {
       playRandomEffect();
