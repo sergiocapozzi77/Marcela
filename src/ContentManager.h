@@ -3,5 +3,5 @@
 
 void startContentManager();
 bool updateAll();
-
+void resetVersion();
 #endif

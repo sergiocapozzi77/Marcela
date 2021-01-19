@@ -1,4 +1,4 @@
-#include "player.h"
+#include "player2.h"
 
 #include "Audio.h"
 #include "fsHelper.h"
@@ -19,7 +19,13 @@ void setupPlayer2()
     randomSeed(2343);
 
     audio2.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+    audio2.setVolume(20);
 
+    refreshDirContent();
+}
+
+void refreshDirContent()
+{
     getDirContent(activeFS, "/mp3", mp3FilesCount2, mp3Files2);
 }
 
@@ -34,7 +40,7 @@ void playRandomEffect2()
   String fileToPlay = mp3Files2[random(mp3FilesCount2)];
   Serial.print("Playing effect: ");
   Serial.println(fileToPlay);
-  playFile(fileToPlay);
+  playFile2(fileToPlay);
 }
 
 void playFile2(String fileName)
@@ -42,6 +48,7 @@ void playFile2(String fileName)
     Serial.println("Stop player");
     if (audio2.isRunning())
         audio2.stopSong();
+
 
     String extension = getExtension(fileName);
     extension.toUpperCase();

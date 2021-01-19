@@ -24,8 +24,13 @@ void startContentManager()
 
     currentVersion = NVS.getInt("version");
     Serial.print("Current version: ");Serial.println(currentVersion);
-
 } 
+
+void resetVersion()
+{
+    currentVersion = 0;
+    NVS.setInt("version", currentVersion);
+}
 
 bool manageOTA(uint32_t version, String link)
 {
@@ -166,8 +171,6 @@ bool updateAll()
 
         endReadingIndex();
     }
-
-    listDir(activeFS, "/mp3", 0);
 
     return true;
 }

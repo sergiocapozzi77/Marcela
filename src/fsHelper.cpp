@@ -73,6 +73,10 @@ void getDirContent(fs::FS &fs, const char * dirname, int &count, String* files){
     File file = root.openNextFile();
     while(file){
         if(!file.isDirectory()){
+            Serial.print("FILE: ");
+            Serial.print(file.name());
+            Serial.print(" - ");
+            Serial.println(file.size());
             files[count++] = String(file.name());
         }
         file = root.openNextFile();

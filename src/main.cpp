@@ -71,6 +71,7 @@ void setup() {
     }
 
     startContentManager();
+    resetVersion();
 
     String tm = NVS.getString("time");
     Serial.print("*** Time read: ");
@@ -117,17 +118,20 @@ void setup() {
 
     digitalWrite (2, HIGH);
     updateAll();
+    refreshDirContent();
     digitalWrite (2, LOW);
     //Serial.println("Singing");
-    playFile2("/mp3/008.mp3");
+    playFile2("/mp3/0006.mp3");
+    
+  //  loopPlayer2();
 }
 
 void loop() {
-     bool isPlaying = loopPlayer2();
-  /*  if(but0->isPressed())
+   bool isPlaying = loopPlayer2();
+    if(but0->isPressed())
     {
-      playRandomEffect();
-    }*/
+      playRandomEffect2();
+    }
 /*
     
     if((wifiMulti.run() == WL_CONNECTED)) {

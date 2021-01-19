@@ -2,9 +2,5 @@
 { id:13, "type": "mp3", "link":"0007", "target":"/mp3/0007.mp3" }
 { id:14, "type": "mp3", "link":"0008", "target":"/mp3/0008.mp3" }
 { id:15, "type": "mp3", "link":"0009", "target":"/mp3/0009.mp3" }
-{ id:16, "type": "del", "target":"/mp3/jbells.mp3" }
-{ id:17, "type": "del", "target":"/mp3/LastChristmas.mp3" }
-{ id:18, "type": "del", "target":"/0011.mp3" }
-{ id:19, "type": "mp3", "link":"LastChristmas.mp3", "target":"/mp3/LastChristmas.mp3" }
 { id:20, "type": "mp3", "link":"0011", "target":"/mp3/0011.wav" }
 { id:21, "type": "mp3", "link":"0012", "target":"/mp3/0012.wav" }
