@@ -1,7 +1,11 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <Arduino.h>
+
 void setupPlayer();
-void play(const char *fileName);
+void playFile(String fileName);
 bool loopPlayer();
+void playRandomEffect();
+
 #endif

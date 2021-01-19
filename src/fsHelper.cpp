@@ -52,6 +52,11 @@ bool SDSetup()
     return true; 
 }
 
+String getExtension(String fileName)
+{
+    return fileName.substring(fileName.lastIndexOf('.'));
+}
+
 void getDirContent(fs::FS &fs, const char * dirname, int &count, String* files){
     count = 0;
 

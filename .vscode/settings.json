@@ -3,6 +3,7 @@
         "new": "cpp",
         "functional": "cpp",
         "random": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "*.tcc": "cpp"
     }
 }

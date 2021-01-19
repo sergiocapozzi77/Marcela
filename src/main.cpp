@@ -119,13 +119,15 @@ void setup() {
     updateAll();
     digitalWrite (2, LOW);
     //Serial.println("Singing");
+     playRandomEffect();
 }
 
 void loop() {
-    bool isPlaying = loopPlayer();
-    if(but0->isPressed())
+     bool isPlaying = loopPlayer();
+  /*  if(but0->isPressed())
     {
-    }
+      playRandomEffect();
+    }*/
 /*
     
     if((wifiMulti.run() == WL_CONNECTED)) {
@@ -148,5 +150,5 @@ void loop() {
 
     }*/
 
-    checkSleep();
+ //   checkSleep();
 }

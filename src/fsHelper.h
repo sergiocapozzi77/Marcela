@@ -17,5 +17,6 @@ bool deleteIfExists(fs::FS &fs, const char * path);
 File openFile(fs::FS &fs, const char * path);
 void closeFile(File file);
 void getDirContent(fs::FS &fs, const char * dirname, int &count, String* files);
+String getExtension(String fileName);
 
 #endif

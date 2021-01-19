@@ -4,7 +4,7 @@
 
 //callback  para envendos das características
 class EmmaButton {
-    const int VALUE_THRESHOLD = 70;
+    const int VALUE_THRESHOLD = 50;
     bool buttonPressed = false;
     bool lastButtonPressed = false;
     // the following variables are unsigned longs because the time, measured in
