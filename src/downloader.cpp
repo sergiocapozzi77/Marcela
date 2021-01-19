@@ -113,7 +113,12 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                     Serial.print("HTTP_EVENT_ON_DATA NOCHUNK: ");
                     Serial.println(evt->data_len);
                     writeOk = writeFile(*usrData->activeFS, usrData->fileName.c_str(), (char *) evt->data, evt->data_len);
-                }          
+                }   
+
+                if(!writeOk)       
+                {
+                    Serial.println("Error whjile writing");
+                }
             }
 
             Serial.print(".");
