@@ -1,10 +1,16 @@
 #include "EmmaSleep.h"
 
+#include "WiFi.h" 
+#include "driver/adc.h"
+#include <esp_wifi.h>
+#include <esp_bt.h>
 #include <Arduino.h>
+#include "SD.h"
+#include "ArduinoNvs.h"
 
 unsigned long lastInteraction;
-const long maxAwakeTime = 60000; //3 minutes
-//const long maxAwakeTime = 20000; //20 seconds
+//const long maxAwakeTime = 60000; //1 minutes
+const long maxAwakeTime = 30000; //20 seconds
 
 void print_wakeup_reason(){
   esp_sleep_wakeup_cause_t wakeup_reason;
@@ -53,7 +59,7 @@ void setupSleep()
 {
     print_wakeup_reason();
 
-    touchAttachInterrupt(T0, callback, 70);
+    touchAttachInterrupt(T0, callback, 50);
 
     esp_sleep_enable_touchpad_wakeup();
 
@@ -63,7 +69,6 @@ void setupSleep()
 void resetSleep()
 {
     lastInteraction = millis();
-    Serial.println("Sleep has been reset");
 }
 
 void checkSleep()
@@ -71,10 +76,26 @@ void checkSleep()
     if(millis() - lastInteraction > maxAwakeTime)
     {
         //clearDisplay();
-        Serial.println("Going to sleep");
       //  Serial.print("Player is: ");
       //  Serial.println(myDFPlayer.readState());
       //  myDFPlayer.sleep();
-        esp_deep_sleep_start();
+        goToDeepSleep();
     }
+}
+
+void goToDeepSleep()
+{
+  Serial.println("Going to sleep...");
+  SD.end();
+  NVS.close();
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+  btStop();
+
+  adc_power_off();
+  //esp_wifi_stop();
+  esp_bt_controller_disable();
+
+  // Go to sleep! Zzzz
+  esp_deep_sleep_start();
 }

@@ -7,6 +7,6 @@ void setupPlayer2();
 void playFile2(String fileName);
 bool loopPlayer2();
 void playRandomEffect2();
-void refreshDirContent();
+void refreshDirContent2();
 
 #endif

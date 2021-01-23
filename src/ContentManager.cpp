@@ -164,7 +164,8 @@ bool updateAll()
             {
                 Serial.println("doc is null");
             }
-        
+
+             Serial.print("Next cycle");
         } while(!doc.isNull());
 
         Serial.println("End reading");

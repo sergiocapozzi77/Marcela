@@ -6,6 +6,7 @@
 #include "AudioOutputI2S.h"
 #include "fsHelper.h"
 #include "common.h"
+#include "EmmaSleep.h"
 
 AudioGeneratorMP3 *mp3;
 AudioGeneratorWAV *wav;
@@ -32,6 +33,11 @@ void setupPlayer()
 
     out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
 
+    refreshDirContent();
+}
+
+void refreshDirContent()
+{
     getDirContent(activeFS, "/mp3", mp3FilesCount, mp3Files);
 }
 
@@ -42,7 +48,7 @@ void playRandomEffect()
     Serial.println("no effects");    
     return;
   }
-
+  
   String fileToPlay = mp3Files[random(mp3FilesCount)];
   Serial.print("Playing effect: ");
   Serial.println(fileToPlay);
@@ -104,6 +110,7 @@ bool loopPlayer()
           //  Serial.println("stopping");
         }
 
+        resetSleep();
         return true;
     }
     else

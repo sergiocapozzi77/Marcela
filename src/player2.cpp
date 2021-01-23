@@ -21,10 +21,10 @@ void setupPlayer2()
     audio2.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     audio2.setVolume(20);
 
-    refreshDirContent();
+    refreshDirContent2();
 }
 
-void refreshDirContent()
+void refreshDirContent2()
 {
     getDirContent(activeFS, "/mp3", mp3FilesCount2, mp3Files2);
 }

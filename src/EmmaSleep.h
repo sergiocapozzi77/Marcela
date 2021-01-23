@@ -5,5 +5,5 @@
 void setupSleep();
 void checkSleep();
 void resetSleep();
-
+void goToDeepSleep();
 #endif
