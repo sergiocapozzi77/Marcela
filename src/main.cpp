@@ -76,9 +76,7 @@ void setupWifi()
 void setup() {
   Serial.begin(115200);
 
-  //goToDeepSleep();
-
-  esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * TIME_TO_SLEEP);
+  //esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * TIME_TO_SLEEP);
 
   pinMode (2, OUTPUT);
 
