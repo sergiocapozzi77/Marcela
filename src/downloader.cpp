@@ -294,7 +294,7 @@ bool downloadFile2(const char *link, String fileName, fs::FS &fs, bool isOtaUpda
 
                             // get tcp stream
                             WiFiClient *stream = https.getStreamPtr();
-                            uint8_t buff[2024] = {0};
+                            uint8_t *buff = new uint8_t[10000];
 
                             File file = openFile(fs, FILE_WRITE, fileName.c_str());
                             // read all data from server
@@ -320,6 +320,7 @@ bool downloadFile2(const char *link, String fileName, fs::FS &fs, bool isOtaUpda
                                 delay(1);
                             }
 
+                            delete buff;
                             file.close();
                             Serial.println("\nDownload complete");
                         }
