@@ -107,7 +107,7 @@ void setup()
   setupSleep();
   setupPlayer();
 
-  // playFile("/mp3/LastChristmas.mp3");
+  playFile("/0000-1111/EarthWindFire.mp3");
   Serial.println("------------------------------- Setup finished ------------------------------- ");
 }
 

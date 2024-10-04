@@ -101,6 +101,16 @@ bool updateAll()
 {
     listDir(activeFS, "/", 0);
 
+    // TODO: remove
+    if (!createFolder(activeFS, "/0000-1111"))
+    {
+        Serial.println("Crating folder 0000-1111 failed");
+    }
+    else
+    {
+        Serial.println("Crating folder 0000-1111 ok");
+    }
+
     if (!downloadIndex())
     {
         return false;

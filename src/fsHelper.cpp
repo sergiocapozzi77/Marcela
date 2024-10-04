@@ -3,10 +3,10 @@
 #include "SD.h"
 File indexFile;
 
-bool deleteIfExists(fs::FS &fs, const char * path)
+bool deleteIfExists(fs::FS &fs, const char *path)
 {
     Serial.printf("deleting: %s\r\n", path);
-    if(fs.exists(path))
+    if (fs.exists(path))
     {
         Serial.printf("deleted: %s\r\n", path);
         return fs.remove(path);
@@ -15,41 +15,55 @@ bool deleteIfExists(fs::FS &fs, const char * path)
     return true;
 }
 
+bool createFolder(fs::FS &fs, const char *path)
+{
+    return fs.mkdir(path);
+}
+
 bool SDSetup()
 {
-    if(!SD.begin()){
+    if (!SD.begin())
+    {
         Serial.println("Card Mount Failed");
         return false;
     }
 
     uint8_t cardType = SD.cardType();
 
-    if(cardType == CARD_NONE){
+    if (cardType == CARD_NONE)
+    {
         Serial.println("No SD card attached");
         return false;
     }
 
     Serial.print("SD Card Type: ");
-    if(cardType == CARD_MMC){
+    if (cardType == CARD_MMC)
+    {
         Serial.println("MMC");
-    } else if(cardType == CARD_SD){
+    }
+    else if (cardType == CARD_SD)
+    {
         Serial.println("SDSC");
-    } else if(cardType == CARD_SDHC){
+    }
+    else if (cardType == CARD_SDHC)
+    {
         Serial.println("SDHC");
-    } else {
+    }
+    else
+    {
         Serial.println("UNKNOWN");
     }
 
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    Serial.printf("SD Card Size: %lluMB\n", cardSize);   
+    Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
-    if(!SD.exists("/mp3"))
+    if (!SD.exists("/mp3"))
     {
         SD.mkdir("/mp3");
         Serial.println("Created mp3 folder");
     }
 
-    return true; 
+    return true;
 }
 
 String getExtension(String fileName)
@@ -57,22 +71,27 @@ String getExtension(String fileName)
     return fileName.substring(fileName.lastIndexOf('.'));
 }
 
-void getDirContent(fs::FS &fs, const char * dirname, int &count, String* files){
+void getDirContent(fs::FS &fs, const char *dirname, int &count, String *files)
+{
     count = 0;
 
     File root = fs.open(dirname);
-    if(!root){
+    if (!root)
+    {
         Serial.println("- failed to open directory");
         return;
     }
-    if(!root.isDirectory()){
+    if (!root.isDirectory())
+    {
         Serial.println(" - not a directory");
         return;
     }
 
     File file = root.openNextFile();
-    while(file){
-        if(!file.isDirectory()){
+    while (file)
+    {
+        if (!file.isDirectory())
+        {
             Serial.print("FILE: ");
             Serial.print(file.name());
             Serial.print(" - ");
@@ -83,58 +102,64 @@ void getDirContent(fs::FS &fs, const char * dirname, int &count, String* files){
     }
 }
 
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
+void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
+{
     Serial.printf("Listing directory: %s\r\n", dirname);
 
     int count;
     String files[255];
     getDirContent(fs, dirname, count, files);
-    for(int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
         Serial.print("  FILE: ");
         Serial.println(files[i]);
     }
-  /*  File root = fs.open(dirname);
-    if(!root){
-        Serial.println("- failed to open directory");
-        return;
-    }
-    if(!root.isDirectory()){
-        Serial.println(" - not a directory");
-        return;
-    }
+    /*  File root = fs.open(dirname);
+      if(!root){
+          Serial.println("- failed to open directory");
+          return;
+      }
+      if(!root.isDirectory()){
+          Serial.println(" - not a directory");
+          return;
+      }
 
-    File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
-            if(levels){
-                listDir(fs, file.name(), levels -1);
-            }
-        } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("\tSIZE: ");
-            Serial.println(file.size());
-        }
-        file = root.openNextFile();
-    }*/
+      File file = root.openNextFile();
+      while(file){
+          if(file.isDirectory()){
+              Serial.print("  DIR : ");
+              Serial.println(file.name());
+              if(levels){
+                  listDir(fs, file.name(), levels -1);
+              }
+          } else {
+              Serial.print("  FILE: ");
+              Serial.print(file.name());
+              Serial.print("\tSIZE: ");
+              Serial.println(file.size());
+          }
+          file = root.openNextFile();
+      }*/
 }
 
-bool writeFile(fs::FS &fs, const char * path, const char * message, const int len){
+bool writeFile(fs::FS &fs, const char *path, const char *message, const int len)
+{
     Serial.printf("Writing file: %s\r\n", path);
 
     bool ret = false;
     File file = fs.open(path, FILE_WRITE);
-    if(!file){
+    if (!file)
+    {
         Serial.println("- failed to open file for writing");
         return false;
     }
-    if(file.write((uint8_t *) message, len)){
+    if (file.write((uint8_t *)message, len))
+    {
         Serial.println("- file written");
         ret = true;
-    } else {
+    }
+    else
+    {
         Serial.println("- frite failed");
     }
 
@@ -143,12 +168,13 @@ bool writeFile(fs::FS &fs, const char * path, const char * message, const int le
     return ret;
 }
 
-File openFile(fs::FS &fs, const char * mode, const char * path)
+File openFile(fs::FS &fs, const char *mode, const char *path)
 {
     File file = fs.open(path, mode);
-    if(!file){
+    if (!file)
+    {
         Serial.println("- failed to open file for appending");
-        return (File) NULL;
+        return (File)NULL;
     }
 
     return file;
@@ -161,13 +187,17 @@ void closeFile(File file)
     Serial.println("Closing file");
 }
 
-bool appendFile(File file, const char * message, const int len){
-    //Serial.printf("Appending to file: %s\r\n", path);
- 
+bool appendFile(File file, const char *message, const int len)
+{
+    // Serial.printf("Appending to file: %s\r\n", path);
+
     bool ret = false;
-    if(file.write((uint8_t *) message, len)){
+    if (file.write((uint8_t *)message, len))
+    {
         ret = true;
-    } else {
+    }
+    else
+    {
         Serial.println("- append failed");
     }
 
@@ -176,8 +206,9 @@ bool appendFile(File file, const char * message, const int len){
 
 bool startReadingIndex(fs::FS &fs)
 {
-      indexFile = fs.open("/index.txt");
-      if(!indexFile || indexFile.isDirectory()){
+    indexFile = fs.open("/index.txt");
+    if (!indexFile || indexFile.isDirectory())
+    {
         Serial.println("- failed to open file for reading");
         return false;
     }
@@ -192,7 +223,7 @@ void endReadingIndex()
 
 void readNextIndexConfig(StaticJsonDocument<200> &indexDoc)
 {
-    if(indexFile.available())
+    if (indexFile.available())
     {
         String line = indexFile.readStringUntil('\n');
         Serial.print("Reading: ");
@@ -201,7 +232,8 @@ void readNextIndexConfig(StaticJsonDocument<200> &indexDoc)
         DeserializationError error = deserializeJson(indexDoc, line.c_str());
 
         // Test if parsing succeeds.
-        if (error) {
+        if (error)
+        {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
             return;
@@ -212,21 +244,24 @@ void readNextIndexConfig(StaticJsonDocument<200> &indexDoc)
     {
         indexDoc = StaticJsonDocument<200>();
     }
-    
+
     return;
 }
 
-void readFile(fs::FS &fs, const char * path){
+void readFile(fs::FS &fs, const char *path)
+{
     Serial.printf("Reading file: %s\r\n", path);
 
     File file = fs.open(path);
-    if(!file || file.isDirectory()){
+    if (!file || file.isDirectory())
+    {
         Serial.println("- failed to open file for reading");
         return;
     }
 
     Serial.println("- read from file:");
-    while(file.available()){        
+    while (file.available())
+    {
         Serial.println(file.readStringUntil('\n'));
         Serial.println("--------");
     }

@@ -18,5 +18,6 @@ File openFile(fs::FS &fs, const char *mode, const char *path);
 void closeFile(File file);
 void getDirContent(fs::FS &fs, const char *dirname, int &count, String *files);
 String getExtension(String fileName);
+bool createFolder(fs::FS &fs, const char *dirname);
 
 #endif
