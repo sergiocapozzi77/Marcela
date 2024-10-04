@@ -5,3 +5,5 @@
 { id:20, "type": "mp3", "link":"0011.wav", "target":"/mp3/0011.wav" }
 { id:21, "type": "mp3", "link":"0012.wav", "target":"/mp3/0012.wav" }
 { id:26, "type": "mp3", "link":"0000-1111/EarthWindFire.mp3", "target":"/0000-1111/EarthWindFire.mp3" }
+{ id:27, "type": "mp3", "link":"0000-1111/ABC Song.mp3", "target":"/0000-1111/ABC Song.mp3" }
+{ id:27, "type": "mp3", "link":"0000-1111/B-I-N-G-O.mp3", "target":"/0000-1111/B-I-N-G-O.mp3" }

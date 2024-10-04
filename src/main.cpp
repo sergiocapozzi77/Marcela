@@ -107,7 +107,9 @@ void setup()
   setupSleep();
   setupPlayer();
 
-  playFile("/0000-1111/EarthWindFire.mp3");
+  // playFile("/0000-1111/EarthWindFire.mp3");
+  playStream();
+
   Serial.println("------------------------------- Setup finished ------------------------------- ");
 }
 

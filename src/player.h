@@ -8,5 +8,6 @@ void playFile(String fileName);
 bool loopPlayer();
 void playRandomEffect();
 void refreshDirContent();
+void playStream();
 
 #endif

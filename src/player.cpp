@@ -7,12 +7,17 @@
 #include "fsHelper.h"
 #include "common.h"
 #include "EmmaSleep.h"
+#include "AudioFileSourceHTTPStream.h"
+#include "AudioFileSourceBuffer.h"
 
 AudioGeneratorMP3 *mp3;
 AudioGeneratorWAV *wav;
 AudioFileSourceSD *fileToPlay;
 AudioOutputI2S *out;
 AudioGenerator *audio = NULL;
+
+AudioFileSourceHTTPStream *httpStream;
+AudioFileSourceBuffer *buff;
 
 // Digital I/O used
 #define I2S_DOUT 25
@@ -24,6 +29,10 @@ String mp3Files[255];
 
 void setupPlayer()
 {
+    httpStream = new AudioFileSourceHTTPStream("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/0000-1111/EarthWindFire.mp3");
+    // httpStream = new AudioFileSourceHTTPStream("http://streamingv2.shoutcast.com/radiofreccia");
+    buff = new AudioFileSourceBuffer(httpStream, 4096);
+
     fileToPlay = new AudioFileSourceSD();
     out = new AudioOutputI2S();
     mp3 = new AudioGeneratorMP3();
@@ -53,6 +62,13 @@ void playRandomEffect()
     Serial.print("Playing effect: ");
     Serial.println(fileToPlay);
     playFile(fileToPlay);
+}
+
+void playStream()
+{
+    audio = mp3;
+    Serial.println("Playing stream");
+    mp3->begin(buff, out);
 }
 
 void playFile(String fileName)

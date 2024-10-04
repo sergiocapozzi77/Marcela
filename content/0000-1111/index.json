@@ -1,0 +1,17 @@
+[
+  {
+    "type": "mp3",
+    "link": "0000-1111/EarthWindFire.mp3",
+    "target": "/0000-1111/EarthWindFire.mp3"
+  },
+  {
+    "type": "mp3",
+    "link": "0000-1111/ABC Song.mp3",
+    "target": "/0000-1111/ABC Song.mp3"
+  },
+  {
+    "type": "mp3",
+    "link": "0000-1111/B-I-N-G-O.mp3",
+    "target": "/0000-1111/B-I-N-G-O.mp3"
+  }
+]
