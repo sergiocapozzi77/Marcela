@@ -5,5 +5,6 @@
 #include "FS.h"
 
 bool downloadFile(const char *link, String fileName, fs::FS &fs, bool isOta);
+bool downloadFile2(const char *link, String fileName, fs::FS &fs, bool isOta);
 
 #endif

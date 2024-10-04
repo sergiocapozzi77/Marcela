@@ -3,7 +3,7 @@
 #include "downloader.h"
 #include "fsHelper.h"
 #include "SD.h"
-#include <ArduinoNvs.h> 
+#include <ArduinoNvs.h>
 #include "common.h"
 
 unsigned int currentVersion = 0;
@@ -14,7 +14,7 @@ void startContentManager()
 {
     uint64_t magicKey = ESP.getEfuseMac();
     uint64_t readKey = NVS.getInt("mac");
-    if(readKey != magicKey)
+    if (readKey != magicKey)
     { // first startup
         Serial.println("Different magic keys: first startup");
         NVS.setInt("mac", magicKey);
@@ -23,8 +23,9 @@ void startContentManager()
     }
 
     currentVersion = NVS.getInt("version");
-    Serial.print("Current version: ");Serial.println(currentVersion);
-} 
+    Serial.print("Current version: ");
+    Serial.println(currentVersion);
+}
 
 void resetVersion()
 {
@@ -35,7 +36,7 @@ void resetVersion()
 bool manageOTA(uint32_t version, String link)
 {
     Serial.println("Found OTA");
-    if(downloadFile(link.c_str(), "", activeFS, true))
+    if (downloadFile2(link.c_str(), "", activeFS, true))
     {
         currentVersion = version;
         Serial.print("Writing version: ");
@@ -50,13 +51,13 @@ bool manageOTA(uint32_t version, String link)
 bool manage_mp3(uint32_t version, String link, JsonDocument &doc)
 {
     Serial.println("Found mp3");
-    if(!doc.containsKey("target"))
+    if (!doc.containsKey("target"))
     {
         Serial.println("mp3 config has no target");
         return false;
     }
 
-    if(downloadFile(link.c_str(), doc["target"].as<String>(), activeFS, false))
+    if (downloadFile2(link.c_str(), doc["target"].as<String>(), activeFS, false))
     {
         Serial.println("mp3 downloaded");
         return true;
@@ -65,11 +66,10 @@ bool manage_mp3(uint32_t version, String link, JsonDocument &doc)
     return false;
 }
 
-
 bool deleteFile(uint32_t version, JsonDocument &doc)
 {
     Serial.println("Found deleteFile");
-    if(!doc.containsKey("target"))
+    if (!doc.containsKey("target"))
     {
         Serial.println("mp3 config has no target");
         return false;
@@ -85,41 +85,45 @@ bool downloadIndex()
 {
     String indexLink = "index";
     indexLink = BASE_ADDRESS + indexLink;
-    if(!downloadFile(indexLink.c_str(), "/index.txt", activeFS, false))
+    if (!downloadFile2(indexLink.c_str(), "/index.txt", activeFS, false))
     {
         return false;
     }
 
-    listDir(activeFS, "/", 0);   
+    Serial.println("Reading index file");
+    listDir(activeFS, "/", 0);
     readFile(activeFS, "/index.txt");
-    
+
     return true;
 }
 
 bool updateAll()
 {
-    listDir(activeFS, "/", 0); 
+    listDir(activeFS, "/", 0);
 
-    if(!downloadIndex())
+    if (!downloadIndex())
     {
         return false;
     }
 
     int consecutiveFailures = 0;
-    
-    if(startReadingIndex(activeFS))
+
+    if (startReadingIndex(activeFS))
     {
         Serial.println("Found lines");
         StaticJsonDocument<200> doc;
-        do {
+        do
+        {
             readNextIndexConfig(doc);
-            if(!doc.isNull())
+            if (!doc.isNull())
             {
                 uint32_t version = doc["id"].as<uint32_t>();
-                Serial.print("Read version: ");Serial.println(version);
-                if(version <= currentVersion)
+                Serial.print("Read version: ");
+                Serial.println(version);
+                if (version <= currentVersion)
                 {
-                    Serial.print("Skipping version: ");Serial.println(version);
+                    Serial.print("Skipping version: ");
+                    Serial.println(version);
                     continue;
                 }
 
@@ -128,21 +132,21 @@ bool updateAll()
                 Serial.print("Link: ");
                 Serial.println(link);
                 bool result = false;
-                if( strcmp(doc["type"], "ota") == 0)
+                if (strcmp(doc["type"], "ota") == 0)
                 {
                     result = manageOTA(version, link);
                 }
-                else if( strcmp(doc["type"], "mp3") == 0)
+                else if (strcmp(doc["type"], "mp3") == 0)
                 {
                     result = manage_mp3(version, link, doc);
                 }
-                else if( strcmp(doc["type"], "del") == 0)
+                else if (strcmp(doc["type"], "del") == 0)
                 {
                     currentVersion = version;
                     result = deleteFile(version, doc);
                 }
 
-                if(result)
+                if (result)
                 {
                     consecutiveFailures = 0;
                     currentVersion = version;
@@ -153,20 +157,19 @@ bool updateAll()
                 else
                 {
                     consecutiveFailures++;
-                    if(consecutiveFailures > MAX_FAILURES)
+                    if (consecutiveFailures > MAX_FAILURES)
                     {
                         return false;
                     }
                 }
-                
             }
             else
             {
                 Serial.println("doc is null");
             }
 
-             Serial.print("Next cycle");
-        } while(!doc.isNull());
+            Serial.print("Next cycle");
+        } while (!doc.isNull());
 
         Serial.println("End reading");
 

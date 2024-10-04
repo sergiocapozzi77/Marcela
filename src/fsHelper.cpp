@@ -143,9 +143,9 @@ bool writeFile(fs::FS &fs, const char * path, const char * message, const int le
     return ret;
 }
 
-File openFile(fs::FS &fs, const char * path)
+File openFile(fs::FS &fs, const char * mode, const char * path)
 {
-    File file = fs.open(path, FILE_APPEND);
+    File file = fs.open(path, mode);
     if(!file){
         Serial.println("- failed to open file for appending");
         return (File) NULL;

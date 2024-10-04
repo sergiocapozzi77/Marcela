@@ -15,9 +15,9 @@ AudioOutputI2S *out;
 AudioGenerator *audio = NULL;
 
 // Digital I/O used
-#define I2S_DOUT      25
-#define I2S_BCLK      27
-#define I2S_LRC       26
+#define I2S_DOUT 25
+#define I2S_BCLK 27
+#define I2S_LRC 26
 
 int mp3FilesCount;
 String mp3Files[255];
@@ -43,16 +43,16 @@ void refreshDirContent()
 
 void playRandomEffect()
 {
-  if(mp3FilesCount == 0)
-  {
-    Serial.println("no effects");    
-    return;
-  }
-  
-  String fileToPlay = mp3Files[random(mp3FilesCount)];
-  Serial.print("Playing effect: ");
-  Serial.println(fileToPlay);
-  playFile(fileToPlay);
+    if (mp3FilesCount == 0)
+    {
+        Serial.println("no effects");
+        return;
+    }
+
+    String fileToPlay = mp3Files[random(mp3FilesCount)];
+    Serial.print("Playing effect: ");
+    Serial.println(fileToPlay);
+    playFile(fileToPlay);
 }
 
 void playFile(String fileName)
@@ -66,11 +66,11 @@ void playFile(String fileName)
     String extension = getExtension(fileName);
     extension.toUpperCase();
 
-    if(extension == ".MP3")
+    if (extension == ".MP3")
     {
         audio = mp3;
     }
-    else if(extension == ".WAV")
+    else if (extension == ".WAV")
     {
         audio = wav;
     }
@@ -96,9 +96,9 @@ void playFile(String fileName)
 
 bool loopPlayer()
 {
-    if(audio == NULL)
+    if (audio == NULL)
     {
-        Serial.println("audio null");
+        // Serial.println("audio null");
         return false;
     }
 
@@ -107,7 +107,7 @@ bool loopPlayer()
         if (!audio->loop())
         {
             audio->stop();
-          //  Serial.println("stopping");
+            //  Serial.println("stopping");
         }
 
         resetSleep();
@@ -115,14 +115,13 @@ bool loopPlayer()
     }
     else
     {
-      //  Serial.println("finish");
+        //  Serial.println("finish");
     }
-    
-    
+
     return false;
-  /*  else
-    {
-        Serial.printf("MP3 done\n");
-        delay(1000);
-    }*/
+    /*  else
+      {
+          Serial.printf("MP3 done\n");
+          delay(1000);
+      }*/
 }
