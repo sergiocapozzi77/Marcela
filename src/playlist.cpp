@@ -42,7 +42,7 @@ bool Playlist::readPlayList(String content)
     {
         String link = items[i]["link"].as<String>();
         String localPath = items[i]["target"].as<String>();
-        downloadFile2((BASE_ADDRESS + link).c_str(), localPath, activeFS, false);
+        downloadFile2((BASE_ADDRESS + link).c_str(), localPath, activeFS, false, false);
     }
 
     return true;
@@ -54,13 +54,13 @@ String Playlist::downloadIndex(const char *name)
     indexLink = BASE_ADDRESS + String(name) + indexLink;
     String fileName = "/" + String(name) + "/index.json";
 
-    if (fileExists(activeFS, fileName.c_str()))
-    {
-        Serial.println("Index exist, skip download");
-        return fileName;
-    }
+    // if (fileExists(activeFS, fileName.c_str()))
+    // {
+    //     Serial.println("Index exist, skip download");
+    //     return fileName;
+    // }
 
-    if (!downloadFile2(indexLink.c_str(), fileName, activeFS, false))
+    if (!downloadFile2(indexLink.c_str(), fileName, activeFS, true, false))
     {
         return "";
     }

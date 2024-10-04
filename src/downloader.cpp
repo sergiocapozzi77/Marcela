@@ -246,8 +246,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-bool downloadFile2(const char *link, String fileName, fs::FS &fs, bool isOtaUpdate)
+bool downloadFile2(const char *link, String fileName, fs::FS &fs, bool deleteIfPresent, bool isOtaUpdate)
 {
+    if (!deleteIfPresent && fileExists(fs, fileName.c_str()))
+    {
+        return true;
+    }
+
     WiFiClientSecure *client = new WiFiClientSecure;
     if (client)
     {
@@ -294,7 +299,7 @@ bool downloadFile2(const char *link, String fileName, fs::FS &fs, bool isOtaUpda
 
                             // get tcp stream
                             WiFiClient *stream = https.getStreamPtr();
-                            uint8_t *buff = new uint8_t[100000];
+                            uint8_t *buff = new uint8_t[20000];
 
                             File file = openFile(fs, FILE_WRITE, fileName.c_str());
                             // read all data from server
@@ -313,11 +318,7 @@ bool downloadFile2(const char *link, String fileName, fs::FS &fs, bool isOtaUpda
                                     {
                                         len -= c;
                                     }
-
-                                    Serial.print('.');
                                 }
-
-                                delay(1);
                             }
 
                             delete buff;

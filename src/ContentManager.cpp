@@ -34,7 +34,7 @@ void resetVersion()
 bool manageOTA(uint32_t version, String link)
 {
     Serial.println("Found OTA");
-    if (downloadFile2(link.c_str(), "", activeFS, true))
+    if (downloadFile2(link.c_str(), "", activeFS, true, true))
     {
         currentVersion = version;
         Serial.print("Writing version: ");
@@ -55,7 +55,7 @@ bool manage_mp3(uint32_t version, String link, JsonDocument &doc)
         return false;
     }
 
-    if (downloadFile2(link.c_str(), doc["target"].as<String>(), activeFS, false))
+    if (downloadFile2(link.c_str(), doc["target"].as<String>(), activeFS, false, false))
     {
         Serial.println("mp3 downloaded");
         return true;
@@ -83,7 +83,7 @@ bool downloadIndex()
 {
     String indexLink = "index";
     indexLink = BASE_ADDRESS + indexLink;
-    if (!downloadFile2(indexLink.c_str(), "/index.txt", activeFS, false))
+    if (!downloadFile2(indexLink.c_str(), "/index.txt", activeFS, true, false))
     {
         return false;
     }
