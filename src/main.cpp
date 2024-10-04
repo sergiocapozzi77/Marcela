@@ -19,6 +19,7 @@
 #include "time.h"
 #include "common.h"
 #include "ContentManager.h"
+#include "playlist.hpp"
 
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 0;
@@ -76,43 +77,6 @@ void setupWifi()
   }
 }
 
-void setup()
-{
-  Serial.begin(115200);
-
-  // esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * TIME_TO_SLEEP);
-  pinMode(2, OUTPUT);
-
-  if (!SDSetup())
-  {
-    Serial.println("Unable to read SD");
-    delay(3000);
-    ESP.restart();
-  }
-
-  listDir(activeFS, "/", 0);
-  listDir(activeFS, "/mp3", 0);
-
-  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-
-  if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER)
-  {
-    updateAllContent();
-
-    goToDeepSleep();
-  }
-
-  updateAllContent();
-
-  setupSleep();
-  setupPlayer();
-
-  // playFile("/0000-1111/EarthWindFire.mp3");
-  playStream();
-
-  Serial.println("------------------------------- Setup finished ------------------------------- ");
-}
-
 void updateAllContent()
 {
   if (!NVS.begin())
@@ -127,12 +91,52 @@ void updateAllContent()
   Serial.print("*** Time read: ");
   Serial.println(tm);
   Serial.println();
-  setupWifi();
   startContentManager();
   // resetVersion();
   digitalWrite(2, HIGH);
   updateAll();
   digitalWrite(2, LOW);
+}
+
+void setup()
+{
+  Serial.begin(115200);
+
+  // esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * TIME_TO_SLEEP);
+  pinMode(2, OUTPUT);
+
+  if (!SDSetup())
+  {
+    Serial.println("Unable to read SD");
+    delay(3000);
+    ESP.restart();
+  }
+
+  setupWifi();
+
+  // listDir(activeFS, "/", 0);
+  //  listDir(activeFS, "/mp3", 0);
+
+  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+
+  if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER)
+  {
+    // updateAllContent();
+
+    goToDeepSleep();
+  }
+
+  // updateAllContent();
+
+  setupSleep();
+  setupPlayer();
+
+  playlist.loadPlaylist("0000-1111");
+
+  // playFile("/0000-1111/EarthWindFire.mp3");
+  // playStream();
+
+  Serial.println("------------------------------- Setup finished ------------------------------- ");
 }
 
 void loop()

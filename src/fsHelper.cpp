@@ -15,6 +15,11 @@ bool deleteIfExists(fs::FS &fs, const char *path)
     return true;
 }
 
+bool fileExists(fs::FS &fs, const char *path)
+{
+    return fs.exists(path);
+}
+
 bool createFolder(fs::FS &fs, const char *path)
 {
     return fs.mkdir(path);
@@ -265,4 +270,28 @@ void readFile(fs::FS &fs, const char *path)
         Serial.println(file.readStringUntil('\n'));
         Serial.println("--------");
     }
+
+    file.close();
+}
+
+String readAllFile(fs::FS &fs, const char *path)
+{
+    Serial.printf("Reading file: %s\r\n", path);
+
+    File file = fs.open(path);
+    if (!file || file.isDirectory())
+    {
+        Serial.println("- failed to open file for reading");
+        return String("");
+    }
+
+    String content = file.readString();
+
+    Serial.print("Read: ");
+    Serial.print(content);
+
+    Serial.println("Closing file");
+    file.close();
+
+    return content;
 }

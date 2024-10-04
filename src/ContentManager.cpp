@@ -7,8 +7,6 @@
 #include "common.h"
 
 unsigned int currentVersion = 0;
-#define BASE_ADDRESS "https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/"
-#define MAX_FAILURES 5
 
 void startContentManager()
 {
