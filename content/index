@@ -4,4 +4,4 @@
 { id:15, "type": "mp3", "link":"0009.mp3", "target":"/mp3/0009.mp3" }
 { id:20, "type": "mp3", "link":"0011.wav", "target":"/mp3/0011.wav" }
 { id:21, "type": "mp3", "link":"0012.wav", "target":"/mp3/0012.wav" }
-{ id:23, "type": "mp3", "link":"0000-1111/EarthWindFire.mp3", "target":"/mp3/EarthWindFire.mp3" }
+{ id:24, "type": "mp3", "link":"0000-1111/EarthWindFire.mp3", "target":"/0000-1111/EarthWindFire.mp3" }
