@@ -68,7 +68,7 @@ void playStream2()
         }*/
 
     Serial.println("Open file");
-    audio.connecttohost("http://192.168.0.141:4040/rest/stream?format=mp3&id=6&u=sergio&p=sergio&v=1.12.0&c=myapp", "sergio", "sergio"); //  128k mp3
+    audio2.connecttohost("http://192.168.0.141:4040/rest/stream?format=mp3&id=6&u=sergio&p=sergio&v=1.12.0&c=myapp", "sergio", "sergio"); //  128k mp3
     // if (!audio2.connecttoFS(activeFS, fileName.c_str(), 0))
     // {
     //     Serial.println("*** Error file open");
