@@ -8,6 +8,7 @@
 #include "common.h"
 #include "EmmaSleep.h"
 #include "AudioFileSourceHTTPStream.h"
+#include "AudioFileSourceICYStream.h"
 #include "AudioFileSourceBuffer.h"
 
 AudioGeneratorMP3 *mp3;
@@ -29,8 +30,8 @@ String mp3Files[255];
 
 void setupPlayer()
 {
-    httpStream = new AudioFileSourceHTTPStream("https://raw.githubusercontent.com/sergiocapozzi77/Marcela/master/content/0000-1111/EarthWindFire.mp3");
-    // httpStream = new AudioFileSourceHTTPStream("http://streamingv2.shoutcast.com/radiofreccia");
+    // httpStream = new AudioFileSourceICYStream("http://localhost:4040/rest/stream?format=mp3&id=6&u=sergio&p=sergio&v=1.12.0&c=myapp");
+    httpStream = new AudioFileSourceHTTPStream("http://192.168.0.141:4040/rest/stream?format=mp3&id=6&u=sergio&p=sergio&v=1.12.0&c=myapp");
     buff = new AudioFileSourceBuffer(httpStream, 4096);
 
     fileToPlay = new AudioFileSourceSD();
@@ -114,7 +115,7 @@ bool loopPlayer()
 {
     if (audio == NULL)
     {
-        // Serial.println("audio null");
+        Serial.println("audio null");
         return false;
     }
 

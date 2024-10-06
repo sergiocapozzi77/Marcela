@@ -15,7 +15,7 @@
 #include "fsHelper.h"
 #include "SD.h"
 
-#include "player.h"
+#include "player2.h"
 #include "time.h"
 #include "common.h"
 #include "ContentManager.h"
@@ -123,29 +123,30 @@ void setup()
   {
     // updateAllContent();
 
-    goToDeepSleep();
+    // goToDeepSleep();
   }
 
   // updateAllContent();
 
-  setupSleep();
-  setupPlayer();
+  // setupSleep();
+  // setupPlayer();
+  setupPlayer2();
 
-  playlist.loadPlaylist("0000-1111");
+  // playlist.loadPlaylist("0000-1111");
 
   // playFile("/0000-1111/EarthWindFire.mp3");
-  // playStream();
+  playStream2();
 
   Serial.println("------------------------------- Setup finished ------------------------------- ");
 }
 
 void loop()
 {
-  bool isPlaying = loopPlayer();
-  if (but0->isPressed())
-  {
-    playRandomEffect();
-  }
+  bool isPlaying = loopPlayer2();
+  // if (but0->isPressed())
+  // {
+  //   playRandomEffect();
+  // }
 
-  checkSleep();
+  // checkSleep();
 }
